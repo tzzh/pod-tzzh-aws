@@ -22,6 +22,7 @@ func main() {
 					{Name: "pod.dynamodb",
 						Vars: []Var{
 							{Name: "batch-get-item"},
+							{Name: "batch-write-item"},
 							{Name: "describe-table"},
 							{Name: "get-item"},
 							{Name: "list-tables"},
@@ -36,6 +37,13 @@ func main() {
 			switch message.Var {
 			case "pod.dynamodb/batch-get-item":
 				res, err := BatchGetItem(message)
+				if err != nil {
+					WriteErrorResponse(message, err)
+				} else {
+					WriteInvokeResponse(message, res)
+				}
+			case "pod.dynamodb/batch-write-item":
+				res, err := BatchWriteItem(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
 				} else {

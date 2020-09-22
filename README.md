@@ -19,6 +19,11 @@ Compile the pod by running `go build`, then:
                     {"AmazingTable" {:Keys [{:some-property {:S "SomeValue"} 
                                              :something-else {:S "SomethingSomething"}}]}}})
 
+(d/batch-write-item {:RequestItems
+                    {"AmazingTable" [{:PutRequest {:Item {:some-property {:S "abxdggje"}
+                                                          :something-else {:S "zxcmbnj"}
+                                                          :another-thing {:S "asdasdsa"}}}}]}})
+
 (d/get-item {:Key {:lalala {:S "zzzzzzzz"}
                    :bbbbbb {:S "abxbxbxx"}}
              :TableName "SomeTable"})

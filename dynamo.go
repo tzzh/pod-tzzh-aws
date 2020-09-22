@@ -23,6 +23,23 @@ func BatchGetItem(inputMessage *Message) (*dynamodb.BatchGetItemOutput, error) {
 	return res, err
 }
 
+func BatchWriteItem(inputMessage *Message) (*dynamodb.BatchWriteItemOutput, error) {
+
+	svc := dynamodb.New(session.New())
+	input := &dynamodb.BatchWriteItemInput{}
+	inputList := []dynamodb.BatchWriteItemInput{}
+	err := json.Unmarshal([]byte(inputMessage.Args), &inputList)
+	if err != nil {
+		return nil, err
+	}
+	if len(inputList) > 0 {
+		input = &inputList[0]
+	}
+
+	res, err := svc.BatchWriteItem(input)
+	return res, err
+}
+
 func DescribeTable(inputMessage *Message) (*dynamodb.DescribeTableOutput, error) {
 
 	svc := dynamodb.New(session.New())
