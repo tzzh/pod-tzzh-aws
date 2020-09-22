@@ -11,7 +11,7 @@ Compile the pod by running `go build`, then:
 ``` clojure
 (require '[babashka.pods])
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
-(require '[pod.dynamodb :as d])
+(require '[pod.tzzh.dynamodb :as d])
 
 (d/list-tables)
 

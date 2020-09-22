@@ -19,7 +19,7 @@ func main() {
 			response := &DescribeResponse{
 				Format: "json",
 				Namespaces: []Namespace{
-					{Name: "pod.dynamodb",
+					{Name: "pod.tzzh.dynamodb",
 						Vars: []Var{
 							{Name: "batch-get-item"},
 							{Name: "batch-write-item"},
@@ -35,35 +35,35 @@ func main() {
 		} else if message.Op == "invoke" {
 
 			switch message.Var {
-			case "pod.dynamodb/batch-get-item":
+			case "pod.tzzh.dynamodb/batch-get-item":
 				res, err := BatchGetItem(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
 				} else {
 					WriteInvokeResponse(message, res)
 				}
-			case "pod.dynamodb/batch-write-item":
+			case "pod.tzzh.dynamodb/batch-write-item":
 				res, err := BatchWriteItem(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
 				} else {
 					WriteInvokeResponse(message, res)
 				}
-			case "pod.dynamodb/describe-table":
+			case "pod.tzzh.dynamodb/describe-table":
 				res, err := DescribeTable(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
 				} else {
 					WriteInvokeResponse(message, res)
 				}
-			case "pod.dynamodb/get-item":
+			case "pod.tzzh.dynamodb/get-item":
 				res, err := GetItem(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
 				} else {
 					WriteInvokeResponse(message, res)
 				}
-			case "pod.dynamodb/list-tables":
+			case "pod.tzzh.dynamodb/list-tables":
 				res, err := ListTables(message)
 				if err != nil {
 					WriteErrorResponse(message, err)
