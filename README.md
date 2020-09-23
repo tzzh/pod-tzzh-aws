@@ -2,16 +2,22 @@
 
 A WIP [pod](https://github.com/babashka/babashka.pods) to interact with AWS using [babashka](https://github.com/borkdude/babashka/).
 
-[This file](./babashka.go) contains the code around receiving/sending bencoded messages from/to babashka.
+[This file](./babashka/babashka.go) contains the code around receiving/sending bencoded messages from/to babashka.
 
-Then [this](./dynamo.go) is just a wrapper around the golang sdk. Only a few functions are implementend at the moment but it would be quite easy to add more (and add other components than dynamodb) if that turns out to be useful.
+Then [this](./gen/generate.clj) generates all the code to use the golang sdk. That might be a bit too hacky but allows to have access to most of the AWS sdk really quickly and I believe this is relatively common in Go to get around the lack of generics.
+
+Currently most dynamodb and s3 functions are supported (adding other services should be easy in most cases as the code is mostly auto generated), but not paginators.
 
 ## Usage
+
 Compile the pod by running `go build`, then:
 ``` clojure
 (require '[babashka.pods])
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
 (require '[pod.tzzh.dynamodb :as d])
+(require '[pod.tzzh.s3 :as s3])
+
+(s3/list-buckets)
 
 (d/list-tables)
 
