@@ -1,7 +1,6 @@
 package main
 
 //go:generate bb gen/generate.clj
-//go:generate go fmt aws/aws.go
 
 import (
 	"github.com/tzzh/pod-tzzh-aws/aws"
