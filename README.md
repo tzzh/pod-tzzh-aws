@@ -10,7 +10,7 @@ Currently most dynamodb and s3 functions are supported (adding other services sh
 
 ## Usage
 
-Compile the pod by running `go build`, then:
+Get the latest release and then:
 ``` clojure
 (require '[babashka.pods])
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
