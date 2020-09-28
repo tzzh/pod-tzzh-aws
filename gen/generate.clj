@@ -1,10 +1,11 @@
-(require '[clojure.string :as s])
-(require '[clojure.java.shell :refer [sh]])
-(require '[babashka.classpath :as c])
-(def cp (-> (sh "clojure" "-Spath" "-Sdeps" (str '{:deps {comb {:mvn/version "0.1.1"}}}))
-            :out
-            s/trim))
-(c/add-classpath cp)
+(ns generate
+  (:require [clojure.string :as s]
+            [clojure.java.shell :as shell]
+            [babashka.classpath :as c]))
+(let [cp (-> (shell/sh "clojure" "-Spath" "-Sdeps" (str '{:deps {comb {:mvn/version "0.1.1"}}}))
+             :out
+             s/trim)]
+  (c/add-classpath cp))
 (require '[comb.template :as template])
 
 (def aws-api {"dynamodb" ["BatchGetItem"
@@ -233,4 +234,10 @@ if message.Op == \"describe\" {
 }
 ")
 
-(spit "./aws/aws.go" (template/eval t {:namespaces aws-api}))
+(when (= *file* (System/getProperty "babashka.file"))
+  (let [aws-go "./aws/aws.go"]
+    (spit aws-go (template/eval t {:namespaces aws-api}))
+    (let [{:keys [err exit]} (shell/sh "go" "fmt" aws-go)]
+      (when-not (empty? err)
+        (print err))
+      (System/exit exit))))

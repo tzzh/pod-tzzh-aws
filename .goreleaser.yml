@@ -2,7 +2,6 @@ before:
   hooks:
     - go mod download
     - go generate ./...
-    - go fmt aws/aws.go
 builds:
   - env:
       - CGO_ENABLED=0
