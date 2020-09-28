@@ -25,7 +25,6 @@ func ProcessMessage(message *babashka.Message) {
 				{Name: "pod.tzzh.dynamodb",
 					Vars: []babashka.Var{
 						{Name: "batch-get-item"},
-						{Name: "batch-get-item-pages"},
 						{Name: "batch-write-item"},
 						{Name: "create-backup"},
 						{Name: "create-global-table"},
@@ -46,18 +45,14 @@ func ProcessMessage(message *babashka.Message) {
 						{Name: "get-item"},
 						{Name: "list-backups"},
 						{Name: "list-contributor-insights"},
-						{Name: "list-contributor-insights-pages"},
 						{Name: "list-global-tables"},
 						{Name: "list-tables"},
-						{Name: "list-tables-pages"},
 						{Name: "list-tags-of-resource"},
 						{Name: "put-item"},
 						{Name: "query"},
-						{Name: "query-pages"},
 						{Name: "restore-table-from-backup"},
 						{Name: "restore-table-to-point-in-time"},
 						{Name: "scan"},
-						{Name: "scan-pages"},
 						{Name: "tag-resource"},
 						{Name: "transact-get-items"},
 						{Name: "transact-write-items"},
@@ -127,15 +122,10 @@ func ProcessMessage(message *babashka.Message) {
 						{Name: "list-bucket-metrics-configurations"},
 						{Name: "list-buckets"},
 						{Name: "list-multipart-uploads"},
-						{Name: "list-multipart-uploads-pages"},
 						{Name: "list-object-versions"},
-						{Name: "list-object-versions-pages"},
 						{Name: "list-objects"},
-						{Name: "list-objects-pages"},
 						{Name: "list-objects-v2"},
-						{Name: "list-objects-v2-pages"},
 						{Name: "list-parts"},
-						{Name: "list-parts-pages"},
 						{Name: "put-bucket-accelerate-configuration"},
 						{Name: "put-bucket-acl"},
 						{Name: "put-bucket-analytics-configuration"},
@@ -186,31 +176,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.BatchGetItem(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.dynamodb/batch-get-item-pages":
-
-			svc := dynamodb.New(session.New())
-			input := &dynamodb.BatchGetItemInput{}
-			inputList := []dynamodb.BatchGetItemInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*dynamodb.BatchGetItemOutput{}
-				err := svc.BatchGetItemPages(input, func(x *dynamodb.BatchGetItemOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -229,9 +195,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.BatchWriteItem(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -250,9 +214,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CreateBackup(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -271,9 +233,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CreateGlobalTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -292,9 +252,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CreateTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -313,9 +271,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBackup(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -334,9 +290,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteItem(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -355,9 +309,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -376,9 +328,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeBackup(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -397,9 +347,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeContinuousBackups(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -418,9 +366,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeContributorInsights(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -439,9 +385,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeEndpoints(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -460,9 +404,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeGlobalTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -481,9 +423,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeGlobalTableSettings(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -502,9 +442,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeLimits(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -523,9 +461,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -544,9 +480,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeTableReplicaAutoScaling(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -565,9 +499,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DescribeTimeToLive(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -586,9 +518,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetItem(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -607,9 +537,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListBackups(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -628,31 +556,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListContributorInsights(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.dynamodb/list-contributor-insights-pages":
-
-			svc := dynamodb.New(session.New())
-			input := &dynamodb.ListContributorInsightsInput{}
-			inputList := []dynamodb.ListContributorInsightsInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*dynamodb.ListContributorInsightsOutput{}
-				err := svc.ListContributorInsightsPages(input, func(x *dynamodb.ListContributorInsightsOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -671,9 +575,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListGlobalTables(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -692,31 +594,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListTables(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.dynamodb/list-tables-pages":
-
-			svc := dynamodb.New(session.New())
-			input := &dynamodb.ListTablesInput{}
-			inputList := []dynamodb.ListTablesInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*dynamodb.ListTablesOutput{}
-				err := svc.ListTablesPages(input, func(x *dynamodb.ListTablesOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -735,9 +613,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListTagsOfResource(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -756,9 +632,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutItem(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -777,31 +651,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.Query(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.dynamodb/query-pages":
-
-			svc := dynamodb.New(session.New())
-			input := &dynamodb.QueryInput{}
-			inputList := []dynamodb.QueryInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*dynamodb.QueryOutput{}
-				err := svc.QueryPages(input, func(x *dynamodb.QueryOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -820,9 +670,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.RestoreTableFromBackup(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -841,9 +689,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.RestoreTableToPointInTime(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -862,31 +708,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.Scan(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.dynamodb/scan-pages":
-
-			svc := dynamodb.New(session.New())
-			input := &dynamodb.ScanInput{}
-			inputList := []dynamodb.ScanInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*dynamodb.ScanOutput{}
-				err := svc.ScanPages(input, func(x *dynamodb.ScanOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -905,9 +727,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.TagResource(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -926,9 +746,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.TransactGetItems(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -947,9 +765,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.TransactWriteItems(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -968,9 +784,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UntagResource(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -989,9 +803,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateContinuousBackups(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1010,9 +822,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateContributorInsights(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1031,9 +841,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateGlobalTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1052,9 +860,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateGlobalTableSettings(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1073,9 +879,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateItem(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1094,9 +898,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateTable(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1115,9 +917,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateTableReplicaAutoScaling(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1136,9 +936,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UpdateTimeToLive(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1157,9 +955,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.AbortMultipartUpload(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1178,9 +974,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CompleteMultipartUpload(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1199,9 +993,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CopyObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1220,9 +1012,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CreateBucket(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1241,9 +1031,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.CreateMultipartUpload(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1262,9 +1050,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucket(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1283,9 +1069,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketAnalyticsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1304,9 +1088,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketCors(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1325,9 +1107,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketEncryption(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1346,9 +1126,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketInventoryConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1367,9 +1145,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketLifecycle(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1388,9 +1164,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketMetricsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1409,9 +1183,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketPolicy(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1430,9 +1202,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketReplication(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1451,9 +1221,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1472,9 +1240,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteBucketWebsite(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1493,9 +1259,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1514,9 +1278,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteObjectTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1535,9 +1297,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeleteObjects(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1556,9 +1316,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.DeletePublicAccessBlock(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1577,9 +1335,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketAccelerateConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1598,9 +1354,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketAcl(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1619,9 +1373,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketAnalyticsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1640,9 +1392,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketCors(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1661,9 +1411,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketEncryption(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1682,9 +1430,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketInventoryConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1703,9 +1449,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketLifecycle(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1724,9 +1468,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketLifecycleConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1745,9 +1487,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketLocation(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1766,9 +1506,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketLogging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1787,9 +1525,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketMetricsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1808,9 +1544,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketPolicy(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1829,9 +1563,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketPolicyStatus(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1850,9 +1582,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketReplication(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1871,9 +1601,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketRequestPayment(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1892,9 +1620,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1913,9 +1639,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketVersioning(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1934,9 +1658,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetBucketWebsite(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1955,9 +1677,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1976,9 +1696,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectAcl(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -1997,9 +1715,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectLegalHold(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2018,9 +1734,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectLockConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2039,9 +1753,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectRetention(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2060,9 +1772,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2081,9 +1791,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetObjectTorrent(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2102,9 +1810,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.GetPublicAccessBlock(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2123,9 +1829,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.HeadBucket(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2144,9 +1848,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.HeadObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2165,9 +1867,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListBucketAnalyticsConfigurations(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2186,9 +1886,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListBucketInventoryConfigurations(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2207,9 +1905,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListBucketMetricsConfigurations(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2228,9 +1924,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListBuckets(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2249,31 +1943,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListMultipartUploads(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.s3/list-multipart-uploads-pages":
-
-			svc := s3.New(session.New())
-			input := &s3.ListMultipartUploadsInput{}
-			inputList := []s3.ListMultipartUploadsInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*s3.ListMultipartUploadsOutput{}
-				err := svc.ListMultipartUploadsPages(input, func(x *s3.ListMultipartUploadsOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2292,31 +1962,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListObjectVersions(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.s3/list-object-versions-pages":
-
-			svc := s3.New(session.New())
-			input := &s3.ListObjectVersionsInput{}
-			inputList := []s3.ListObjectVersionsInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*s3.ListObjectVersionsOutput{}
-				err := svc.ListObjectVersionsPages(input, func(x *s3.ListObjectVersionsOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2335,31 +1981,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListObjects(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.s3/list-objects-pages":
-
-			svc := s3.New(session.New())
-			input := &s3.ListObjectsInput{}
-			inputList := []s3.ListObjectsInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*s3.ListObjectsOutput{}
-				err := svc.ListObjectsPages(input, func(x *s3.ListObjectsOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2378,31 +2000,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListObjectsV2(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.s3/list-objects-v2-pages":
-
-			svc := s3.New(session.New())
-			input := &s3.ListObjectsV2Input{}
-			inputList := []s3.ListObjectsV2Input{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*s3.ListObjectsV2Output{}
-				err := svc.ListObjectsV2Pages(input, func(x *s3.ListObjectsV2Output, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2421,31 +2019,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.ListParts(input)
-
-				if err != nil {
-					babashka.WriteErrorResponse(message, err)
-				} else {
-					babashka.WriteInvokeResponse(message, res)
-				}
-			}
-		case "pod.tzzh.s3/list-parts-pages":
-
-			svc := s3.New(session.New())
-			input := &s3.ListPartsInput{}
-			inputList := []s3.ListPartsInput{}
-			err := json.Unmarshal([]byte(message.Args), &inputList)
-			if err != nil {
-				babashka.WriteErrorResponse(message, err)
-			} else {
-				if len(inputList) > 0 {
-					input = &inputList[0]
-				}
-
-				res := []*s3.ListPartsOutput{}
-				err := svc.ListPartsPages(input, func(x *s3.ListPartsOutput, b bool) bool { res = append(res, x); return true })
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2464,9 +2038,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketAccelerateConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2485,9 +2057,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketAcl(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2506,9 +2076,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketAnalyticsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2527,9 +2095,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketCors(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2548,9 +2114,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketEncryption(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2569,9 +2133,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketInventoryConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2590,9 +2152,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketLifecycle(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2611,9 +2171,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketLifecycleConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2632,9 +2190,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketLogging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2653,9 +2209,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketMetricsConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2674,9 +2228,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketNotification(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2695,9 +2247,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketNotificationConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2716,9 +2266,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketPolicy(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2737,9 +2285,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketReplication(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2758,9 +2304,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketRequestPayment(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2779,9 +2323,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2800,9 +2342,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketVersioning(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2821,9 +2361,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutBucketWebsite(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2842,9 +2380,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2863,9 +2399,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObjectAcl(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2884,9 +2418,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObjectLegalHold(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2905,9 +2437,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObjectLockConfiguration(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2926,9 +2456,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObjectRetention(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2947,9 +2475,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutObjectTagging(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2968,9 +2494,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.PutPublicAccessBlock(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -2989,9 +2513,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.RestoreObject(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -3010,9 +2532,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.SelectObjectContent(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -3031,9 +2551,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UploadPart(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {
@@ -3052,9 +2570,7 @@ func ProcessMessage(message *babashka.Message) {
 				if len(inputList) > 0 {
 					input = &inputList[0]
 				}
-
 				res, err := svc.UploadPartCopy(input)
-
 				if err != nil {
 					babashka.WriteErrorResponse(message, err)
 				} else {

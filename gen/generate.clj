@@ -9,7 +9,6 @@
 (require '[comb.template :as template])
 
 (def aws-api {"dynamodb" ["BatchGetItem"
-                          "BatchGetItemPages"
                           "BatchWriteItem"
                           "CreateBackup"
                           "CreateGlobalTable"
@@ -30,18 +29,14 @@
                           "GetItem"
                           "ListBackups"
                           "ListContributorInsights"
-                          "ListContributorInsightsPages"
                           "ListGlobalTables"
                           "ListTables"
-                          "ListTablesPages"
                           "ListTagsOfResource"
                           "PutItem"
                           "Query"
-                          "QueryPages"
                           "RestoreTableFromBackup"
                           "RestoreTableToPointInTime"
                           "Scan"
-                          "ScanPages"
                           "TagResource"
                           "TransactGetItems"
                           "TransactWriteItems"
@@ -107,15 +102,10 @@
                     "ListBucketMetricsConfigurations"
                     "ListBuckets"
                     "ListMultipartUploads"
-                    "ListMultipartUploadsPages"
                     "ListObjectVersions"
-                    "ListObjectVersionsPages"
                     "ListObjects"
-                    "ListObjectsPages"
                     "ListObjectsV2"
-                    "ListObjectsV2Pages"
                     "ListParts"
-                    "ListPartsPages"
                     "PutBucketAccelerateConfiguration"
                     "PutBucketAcl"
                     "PutBucketAnalyticsConfiguration"
@@ -155,15 +145,11 @@
 
 (defn aws-input-name
   [aws-fn-name]
-  (if-let [[_ prefix-fn-name] (re-matches #"(.*)Pages" aws-fn-name)]
-    (str prefix-fn-name "Input")
-    (str aws-fn-name "Input")))
+  (str aws-fn-name "Input"))
 
 (defn aws-output-name
   [aws-fn-name]
-  (if-let [[_ prefix-fn-name] (re-matches #"(.*)Pages" aws-fn-name)]
-    (str prefix-fn-name "Output")
-    (str aws-fn-name "Output")))
+  (str aws-fn-name "Output"))
 
 (def quoted-get-paginator
   (quote
@@ -234,12 +220,7 @@ if message.Op == \"describe\" {
           if len(inputList) > 0 {
               input = &inputList[0]
           }
-<% (if (re-matches #\"(.*)Pages\" ns-fn) (do %>
-          res := []*<%= ns-name %>.<%= (aws-output-name ns-fn) %>{}
-          err := svc.<%= ns-fn %>(input, func(x *<%= ns-name %>.<%= (aws-output-name ns-fn) %>, b bool) bool { res = append(res,x); return true })
-<% ) (do %>
           res, err := svc.<%= ns-fn %>(input)
-<% )) %>
           if err != nil {
               babashka.WriteErrorResponse(message, err)
           } else {
