@@ -22,6 +22,7 @@ type Namespace struct {
 
 type Var struct {
 	Name string "name"
+	Code string `bencode:"code,omitempty"`
 }
 
 type DescribeResponse struct {

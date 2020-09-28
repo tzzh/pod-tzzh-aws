@@ -16,6 +16,12 @@ func ProcessMessage(message *babashka.Message) {
 		response := &babashka.DescribeResponse{
 			Format: "json",
 			Namespaces: []babashka.Namespace{
+				{Name: "pod.tzzh.paginator",
+					Vars: []babashka.Var{
+						{Name: "get-paginator",
+							Code: `(defn get-paginator "Returns a fn that lazily fetches the pages for a given aws fn" [page-fn] (fn get-pages [input] (lazy-seq (let [page (page-fn input)] (if-let [next-continuation-token (:NextContinuationToken page)] (cons page (get-pages (assoc input :ContinuationToken next-continuation-token))) [page])))))`},
+					},
+				},
 				{Name: "pod.tzzh.dynamodb",
 					Vars: []babashka.Var{
 						{Name: "batch-get-item"},
