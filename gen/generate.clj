@@ -10,7 +10,14 @@
 
 (def SERVICES
   "Services to generate code for"
-  ["dynamodb"
+  ["athena"
+   "glue"
+   "kafka"
+   "kinesis"
+   "lambda"
+   "sqs"
+   "ssm"
+   "dynamodb"
    "s3"])
 
 (defn read-service-source
@@ -58,12 +65,22 @@
       "Returns a fn that lazily fetches the pages for a given aws fn"
       [page-fn]
       (fn get-pages
-        [input]
-        (lazy-seq
-          (let [page (page-fn input)]
-            (if-let [next-continuation-token (:NextContinuationToken page)]
-              (cons page (get-pages (assoc input :ContinuationToken next-continuation-token)))
-              [page])))))))
+        ([]
+         (get-pages {}))
+        ([input]
+         (lazy-seq
+           (let [page (page-fn input)
+                 next-continuation-token (:NextContinuationToken page)
+                 next-token (:NextToken page)
+                 next-marker (:NextMarker page)] ;; some services use different types of continuation tokens
+             (cond next-continuation-token
+                     (cons page (get-pages (assoc input :ContinuationToken next-continuation-token)))
+                   next-token
+                     (cons page (get-pages (assoc input :NextToken next-token)))
+                   next-marker
+                     (cons page (get-pages (assoc input :Marker next-marker)))
+                   :else
+                     [page]))))))))
 
 (def t
   "
