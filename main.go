@@ -1,7 +1,5 @@
 package main
 
-//go:generate bb gen/generate.clj
-
 import (
 	"github.com/tzzh/pod-tzzh-aws/aws"
 	"github.com/tzzh/pod-tzzh-aws/babashka"
