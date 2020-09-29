@@ -16,6 +16,7 @@ Get the latest release and then:
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
 (require '[pod.tzzh.dynamodb :as d])
 (require '[pod.tzzh.s3 :as s3])
+(require '[pod.tzzh.paginator :as p])
 
 
 (d/list-tables)
@@ -37,12 +38,19 @@ Get the latest release and then:
 
 (s3/list-buckets)
 
-(s3/list-objects-v2-pages {:Bucket "some-bucket"
-                           :Prefix "some-prefix/something/"})
-;; this returns a list of all the pages i.e a list of ListObjectsV2Output
+(let [s3-paginator (p/get-paginator s3/list-objects-v2-pages)]
+    (s3-paginator {:Bucket "some-bucket"
+                   :Prefix "some-prefix/something/"}))
+;; this returns a list of all the pages i.e a list of ListObjectsV2Output that are lazily fetched
 ```
 
 ## Paginators
 
-In the Go sdk paginators use a function argument which is called on each page and returns a boolean that tells when to stop iterating.
-That behaviour would be really tricky to implement so instead the paginators return a list of all the pages.
+In the Go sdk paginators take a function argument which is called on each page and returns a boolean that tells when to stop iterating, and the paginator itself doesn't return anything.
+For example the signature of `ListObjectsV2Pages` is
+```go
+func (c *S3) ListObjectsV2Pages(input *ListObjectsV2Input, fn func(*ListObjectsV2Output, bool) bool) error
+```
+Whereas in the Python sdk, the paginators are instead generators that lazily loads the pages.
+This approach is more functional and has been copied here.
+To use it you need to use the `get-paginator` fn from the `pod.tzzh.paginator` namespace and pass the fn you need to use as an argument to `get-paginator` as shown in the example above.
