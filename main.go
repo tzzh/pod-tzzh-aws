@@ -3,18 +3,17 @@ package main
 import (
 	"github.com/tzzh/pod-tzzh-aws/aws"
 	"github.com/tzzh/pod-tzzh-aws/babashka"
+	"io/ioutil"
 	"log"
 	"os"
 )
 
 func main() {
-	f, err := os.OpenFile("/tmp/pod-tzzh-aws.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+	debug := os.Getenv("POD_TZZH_AWS_DEBUG")
+	if debug != "true" {
+		log.SetOutput(ioutil.Discard)
 	}
-	defer f.Close()
 
-	log.SetOutput(f)
 	for {
 		message := babashka.ReadMessage()
 		aws.ProcessMessage(message)

@@ -2,6 +2,8 @@
 
 A [pod](https://github.com/babashka/babashka.pods) to interact with AWS using [babashka](https://github.com/borkdude/babashka/).
 
+The API is the same as the Java/Python/Go sdks, with clojurized function name, e.g `BatchGetItem` becomes `batch-get-item`.
+
 [This file](./babashka/babashka.go) contains the code around receiving/sending bencoded messages from/to babashka.
 
 Then [this](./gen/generate.clj) generates all the code to use the golang sdk. That might be a bit hacky but allows to have access to most of the AWS sdk really quickly and I believe this is relatively common in Go to get around the lack of generics.
@@ -61,3 +63,7 @@ Whereas in the Python sdk, the paginators are instead generators that lazily loa
 This approach is more functional and has been copied here.
 To use it you need to use the `get-paginator` fn from the `pod.tzzh.paginator` namespace and pass the fn you need to use as an argument to `get-paginator` as shown in the example above.
 The functions that use either `NextContinuationToken`, `NextToken` and `NextMarker` to paginate can currently be paginated.
+
+## Debugging
+
+For debugging set the environment variable `POD_TZZH_AWS_DEBUG=true` and the logs will show in stderr.
