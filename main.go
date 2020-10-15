@@ -16,6 +16,16 @@ func main() {
 
 	for {
 		message := babashka.ReadMessage()
-		aws.ProcessMessage(message)
+		res, err := aws.ProcessMessage(message)
+		if err != nil {
+			babashka.WriteErrorResponse(message, err)
+			continue
+		}
+		describeRes, ok := res.(*babashka.DescribeResponse)
+		if ok {
+			babashka.WriteDescribeResponse(describeRes)
+			continue
+		}
+		babashka.WriteInvokeResponse(message, res)
 	}
 }

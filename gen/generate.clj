@@ -88,6 +88,7 @@
   package aws
 
   import (
+  \"errors\"
   \"encoding/json\"
   \"github.com/aws/aws-sdk-go/aws/session\"
   <% (doseq [[ns-name _] namespaces]
@@ -96,7 +97,7 @@
   \"github.com/tzzh/pod-tzzh-aws/babashka\"
   )
 
-  func ProcessMessage(message *babashka.Message) {
+  func ProcessMessage(message *babashka.Message) (interface{}, error){
 
   if message.Op == \"describe\" {
     response := &babashka.DescribeResponse{
@@ -119,7 +120,7 @@
         <% ) %>
         },
     }
-    babashka.WriteDescribeResponse(response)
+  return response, nil
 
   } else if message.Op == \"invoke\" {
 
@@ -133,22 +134,23 @@
     inputList := []<%= ns-name %>.<%= (aws-input-name ns-fn)%>{}
     err := json.Unmarshal([]byte(message.Args), &inputList)
     if err != nil {
-        babashka.WriteErrorResponse(message, err)
-    } else {
-          if len(inputList) > 0 {
-              input = &inputList[0]
-          }
-          res, err := svc.<%= ns-fn %>(input)
-          if err != nil {
-              babashka.WriteErrorResponse(message, err)
-          } else {
-              babashka.WriteInvokeResponse(message, res)
-          }
-      }
-  <% ) %>
-          }
-  }
-  }
+        return nil, err
+    }
+
+    if len(inputList) > 0 {
+        input = &inputList[0]
+    }
+    res, err := svc.<%= ns-fn %>(input)
+    if err != nil {
+        return nil, err
+    }
+    return res, nil
+<% ) %>
+    }
+}
+
+    return nil, errors.New(\"Unsupported Operation\")
+}
 ")
 
 (when (= *file* (System/getProperty "babashka.file"))
