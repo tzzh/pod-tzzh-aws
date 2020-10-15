@@ -14,12 +14,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/ssm"
-
 	"github.com/tzzh/pod-tzzh-aws/babashka"
 )
 
 func ProcessMessage(message *babashka.Message) (interface{}, error) {
-
 	if message.Op == "describe" {
 		response := &babashka.DescribeResponse{
 			Format: "json",
@@ -62,6 +60,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-work-group"},
 					},
 				},
+
 				{Name: "pod.tzzh.dynamodb",
 					Vars: []babashka.Var{
 						{Name: "batch-get-item"},
@@ -107,6 +106,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-time-to-live"},
 					},
 				},
+
 				{Name: "pod.tzzh.glue",
 					Vars: []babashka.Var{
 						{Name: "batch-create-partition"},
@@ -246,6 +246,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-workflow"},
 					},
 				},
+
 				{Name: "pod.tzzh.kafka",
 					Vars: []babashka.Var{
 						{Name: "batch-associate-scram-secret"},
@@ -279,6 +280,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-monitoring"},
 					},
 				},
+
 				{Name: "pod.tzzh.kinesis",
 					Vars: []babashka.Var{
 						{Name: "add-tags-to-stream"},
@@ -311,6 +313,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-shard-count"},
 					},
 				},
+
 				{Name: "pod.tzzh.lambda",
 					Vars: []babashka.Var{
 						{Name: "add-layer-version-permission"},
@@ -364,6 +367,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-function-event-invoke-config"},
 					},
 				},
+
 				{Name: "pod.tzzh.s3",
 					Vars: []babashka.Var{
 						{Name: "abort-multipart-upload"},
@@ -454,6 +458,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "upload-part-copy"},
 					},
 				},
+
 				{Name: "pod.tzzh.sqs",
 					Vars: []babashka.Var{
 						{Name: "add-permission"},
@@ -478,6 +483,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "untag-queue"},
 					},
 				},
+
 				{Name: "pod.tzzh.ssm",
 					Vars: []babashka.Var{
 						{Name: "add-tags-to-resource"},
@@ -609,10 +615,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 		return response, nil
 
 	} else if message.Op == "invoke" {
-
 		switch message.Var {
 		case "pod.tzzh.athena/batch-get-named-query":
-
 			svc := athena.New(session.New())
 			input := &athena.BatchGetNamedQueryInput{}
 			inputList := []athena.BatchGetNamedQueryInput{}
@@ -620,7 +624,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -629,8 +632,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/batch-get-query-execution":
 
+		case "pod.tzzh.athena/batch-get-query-execution":
 			svc := athena.New(session.New())
 			input := &athena.BatchGetQueryExecutionInput{}
 			inputList := []athena.BatchGetQueryExecutionInput{}
@@ -638,7 +641,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -647,8 +649,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/create-data-catalog":
 
+		case "pod.tzzh.athena/create-data-catalog":
 			svc := athena.New(session.New())
 			input := &athena.CreateDataCatalogInput{}
 			inputList := []athena.CreateDataCatalogInput{}
@@ -656,7 +658,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -665,8 +666,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/create-named-query":
 
+		case "pod.tzzh.athena/create-named-query":
 			svc := athena.New(session.New())
 			input := &athena.CreateNamedQueryInput{}
 			inputList := []athena.CreateNamedQueryInput{}
@@ -674,7 +675,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -683,8 +683,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/create-work-group":
 
+		case "pod.tzzh.athena/create-work-group":
 			svc := athena.New(session.New())
 			input := &athena.CreateWorkGroupInput{}
 			inputList := []athena.CreateWorkGroupInput{}
@@ -692,7 +692,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -701,8 +700,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/delete-data-catalog":
 
+		case "pod.tzzh.athena/delete-data-catalog":
 			svc := athena.New(session.New())
 			input := &athena.DeleteDataCatalogInput{}
 			inputList := []athena.DeleteDataCatalogInput{}
@@ -710,7 +709,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -719,8 +717,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/delete-named-query":
 
+		case "pod.tzzh.athena/delete-named-query":
 			svc := athena.New(session.New())
 			input := &athena.DeleteNamedQueryInput{}
 			inputList := []athena.DeleteNamedQueryInput{}
@@ -728,7 +726,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -737,8 +734,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/delete-work-group":
 
+		case "pod.tzzh.athena/delete-work-group":
 			svc := athena.New(session.New())
 			input := &athena.DeleteWorkGroupInput{}
 			inputList := []athena.DeleteWorkGroupInput{}
@@ -746,7 +743,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -755,8 +751,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-data-catalog":
 
+		case "pod.tzzh.athena/get-data-catalog":
 			svc := athena.New(session.New())
 			input := &athena.GetDataCatalogInput{}
 			inputList := []athena.GetDataCatalogInput{}
@@ -764,7 +760,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -773,8 +768,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-database":
 
+		case "pod.tzzh.athena/get-database":
 			svc := athena.New(session.New())
 			input := &athena.GetDatabaseInput{}
 			inputList := []athena.GetDatabaseInput{}
@@ -782,7 +777,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -791,8 +785,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-named-query":
 
+		case "pod.tzzh.athena/get-named-query":
 			svc := athena.New(session.New())
 			input := &athena.GetNamedQueryInput{}
 			inputList := []athena.GetNamedQueryInput{}
@@ -800,7 +794,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -809,8 +802,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-query-execution":
 
+		case "pod.tzzh.athena/get-query-execution":
 			svc := athena.New(session.New())
 			input := &athena.GetQueryExecutionInput{}
 			inputList := []athena.GetQueryExecutionInput{}
@@ -818,7 +811,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -827,8 +819,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-query-results":
 
+		case "pod.tzzh.athena/get-query-results":
 			svc := athena.New(session.New())
 			input := &athena.GetQueryResultsInput{}
 			inputList := []athena.GetQueryResultsInput{}
@@ -836,7 +828,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -845,8 +836,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-table-metadata":
 
+		case "pod.tzzh.athena/get-table-metadata":
 			svc := athena.New(session.New())
 			input := &athena.GetTableMetadataInput{}
 			inputList := []athena.GetTableMetadataInput{}
@@ -854,7 +845,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -863,8 +853,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/get-work-group":
 
+		case "pod.tzzh.athena/get-work-group":
 			svc := athena.New(session.New())
 			input := &athena.GetWorkGroupInput{}
 			inputList := []athena.GetWorkGroupInput{}
@@ -872,7 +862,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -881,8 +870,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-data-catalogs":
 
+		case "pod.tzzh.athena/list-data-catalogs":
 			svc := athena.New(session.New())
 			input := &athena.ListDataCatalogsInput{}
 			inputList := []athena.ListDataCatalogsInput{}
@@ -890,7 +879,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -899,8 +887,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-databases":
 
+		case "pod.tzzh.athena/list-databases":
 			svc := athena.New(session.New())
 			input := &athena.ListDatabasesInput{}
 			inputList := []athena.ListDatabasesInput{}
@@ -908,7 +896,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -917,8 +904,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-named-queries":
 
+		case "pod.tzzh.athena/list-named-queries":
 			svc := athena.New(session.New())
 			input := &athena.ListNamedQueriesInput{}
 			inputList := []athena.ListNamedQueriesInput{}
@@ -926,7 +913,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -935,8 +921,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-query-executions":
 
+		case "pod.tzzh.athena/list-query-executions":
 			svc := athena.New(session.New())
 			input := &athena.ListQueryExecutionsInput{}
 			inputList := []athena.ListQueryExecutionsInput{}
@@ -944,7 +930,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -953,8 +938,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-table-metadata":
 
+		case "pod.tzzh.athena/list-table-metadata":
 			svc := athena.New(session.New())
 			input := &athena.ListTableMetadataInput{}
 			inputList := []athena.ListTableMetadataInput{}
@@ -962,7 +947,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -971,8 +955,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-tags-for-resource":
 
+		case "pod.tzzh.athena/list-tags-for-resource":
 			svc := athena.New(session.New())
 			input := &athena.ListTagsForResourceInput{}
 			inputList := []athena.ListTagsForResourceInput{}
@@ -980,7 +964,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -989,8 +972,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/list-work-groups":
 
+		case "pod.tzzh.athena/list-work-groups":
 			svc := athena.New(session.New())
 			input := &athena.ListWorkGroupsInput{}
 			inputList := []athena.ListWorkGroupsInput{}
@@ -998,7 +981,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1007,8 +989,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/start-query-execution":
 
+		case "pod.tzzh.athena/start-query-execution":
 			svc := athena.New(session.New())
 			input := &athena.StartQueryExecutionInput{}
 			inputList := []athena.StartQueryExecutionInput{}
@@ -1016,7 +998,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1025,8 +1006,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/stop-query-execution":
 
+		case "pod.tzzh.athena/stop-query-execution":
 			svc := athena.New(session.New())
 			input := &athena.StopQueryExecutionInput{}
 			inputList := []athena.StopQueryExecutionInput{}
@@ -1034,7 +1015,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1043,8 +1023,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/tag-resource":
 
+		case "pod.tzzh.athena/tag-resource":
 			svc := athena.New(session.New())
 			input := &athena.TagResourceInput{}
 			inputList := []athena.TagResourceInput{}
@@ -1052,7 +1032,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1061,8 +1040,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/untag-resource":
 
+		case "pod.tzzh.athena/untag-resource":
 			svc := athena.New(session.New())
 			input := &athena.UntagResourceInput{}
 			inputList := []athena.UntagResourceInput{}
@@ -1070,7 +1049,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1079,8 +1057,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/update-data-catalog":
 
+		case "pod.tzzh.athena/update-data-catalog":
 			svc := athena.New(session.New())
 			input := &athena.UpdateDataCatalogInput{}
 			inputList := []athena.UpdateDataCatalogInput{}
@@ -1088,7 +1066,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1097,8 +1074,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.athena/update-work-group":
 
+		case "pod.tzzh.athena/update-work-group":
 			svc := athena.New(session.New())
 			input := &athena.UpdateWorkGroupInput{}
 			inputList := []athena.UpdateWorkGroupInput{}
@@ -1106,7 +1083,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1115,8 +1091,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/batch-get-item":
 
+		case "pod.tzzh.dynamodb/batch-get-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.BatchGetItemInput{}
 			inputList := []dynamodb.BatchGetItemInput{}
@@ -1124,7 +1100,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1133,8 +1108,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/batch-write-item":
 
+		case "pod.tzzh.dynamodb/batch-write-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.BatchWriteItemInput{}
 			inputList := []dynamodb.BatchWriteItemInput{}
@@ -1142,7 +1117,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1151,8 +1125,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/create-backup":
 
+		case "pod.tzzh.dynamodb/create-backup":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.CreateBackupInput{}
 			inputList := []dynamodb.CreateBackupInput{}
@@ -1160,7 +1134,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1169,8 +1142,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/create-global-table":
 
+		case "pod.tzzh.dynamodb/create-global-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.CreateGlobalTableInput{}
 			inputList := []dynamodb.CreateGlobalTableInput{}
@@ -1178,7 +1151,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1187,8 +1159,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/create-table":
 
+		case "pod.tzzh.dynamodb/create-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.CreateTableInput{}
 			inputList := []dynamodb.CreateTableInput{}
@@ -1196,7 +1168,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1205,8 +1176,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/delete-backup":
 
+		case "pod.tzzh.dynamodb/delete-backup":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DeleteBackupInput{}
 			inputList := []dynamodb.DeleteBackupInput{}
@@ -1214,7 +1185,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1223,8 +1193,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/delete-item":
 
+		case "pod.tzzh.dynamodb/delete-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DeleteItemInput{}
 			inputList := []dynamodb.DeleteItemInput{}
@@ -1232,7 +1202,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1241,8 +1210,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/delete-table":
 
+		case "pod.tzzh.dynamodb/delete-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DeleteTableInput{}
 			inputList := []dynamodb.DeleteTableInput{}
@@ -1250,7 +1219,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1259,8 +1227,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-backup":
 
+		case "pod.tzzh.dynamodb/describe-backup":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeBackupInput{}
 			inputList := []dynamodb.DescribeBackupInput{}
@@ -1268,7 +1236,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1277,8 +1244,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-continuous-backups":
 
+		case "pod.tzzh.dynamodb/describe-continuous-backups":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeContinuousBackupsInput{}
 			inputList := []dynamodb.DescribeContinuousBackupsInput{}
@@ -1286,7 +1253,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1295,8 +1261,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-contributor-insights":
 
+		case "pod.tzzh.dynamodb/describe-contributor-insights":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeContributorInsightsInput{}
 			inputList := []dynamodb.DescribeContributorInsightsInput{}
@@ -1304,7 +1270,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1313,8 +1278,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-endpoints":
 
+		case "pod.tzzh.dynamodb/describe-endpoints":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeEndpointsInput{}
 			inputList := []dynamodb.DescribeEndpointsInput{}
@@ -1322,7 +1287,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1331,8 +1295,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-global-table":
 
+		case "pod.tzzh.dynamodb/describe-global-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeGlobalTableInput{}
 			inputList := []dynamodb.DescribeGlobalTableInput{}
@@ -1340,7 +1304,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1349,8 +1312,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-global-table-settings":
 
+		case "pod.tzzh.dynamodb/describe-global-table-settings":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeGlobalTableSettingsInput{}
 			inputList := []dynamodb.DescribeGlobalTableSettingsInput{}
@@ -1358,7 +1321,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1367,8 +1329,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-limits":
 
+		case "pod.tzzh.dynamodb/describe-limits":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeLimitsInput{}
 			inputList := []dynamodb.DescribeLimitsInput{}
@@ -1376,7 +1338,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1385,8 +1346,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-table":
 
+		case "pod.tzzh.dynamodb/describe-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeTableInput{}
 			inputList := []dynamodb.DescribeTableInput{}
@@ -1394,7 +1355,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1403,8 +1363,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-table-replica-auto-scaling":
 
+		case "pod.tzzh.dynamodb/describe-table-replica-auto-scaling":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeTableReplicaAutoScalingInput{}
 			inputList := []dynamodb.DescribeTableReplicaAutoScalingInput{}
@@ -1412,7 +1372,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1421,8 +1380,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/describe-time-to-live":
 
+		case "pod.tzzh.dynamodb/describe-time-to-live":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.DescribeTimeToLiveInput{}
 			inputList := []dynamodb.DescribeTimeToLiveInput{}
@@ -1430,7 +1389,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1439,8 +1397,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/get-item":
 
+		case "pod.tzzh.dynamodb/get-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.GetItemInput{}
 			inputList := []dynamodb.GetItemInput{}
@@ -1448,7 +1406,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1457,8 +1414,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/list-backups":
 
+		case "pod.tzzh.dynamodb/list-backups":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ListBackupsInput{}
 			inputList := []dynamodb.ListBackupsInput{}
@@ -1466,7 +1423,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1475,8 +1431,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/list-contributor-insights":
 
+		case "pod.tzzh.dynamodb/list-contributor-insights":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ListContributorInsightsInput{}
 			inputList := []dynamodb.ListContributorInsightsInput{}
@@ -1484,7 +1440,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1493,8 +1448,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/list-global-tables":
 
+		case "pod.tzzh.dynamodb/list-global-tables":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ListGlobalTablesInput{}
 			inputList := []dynamodb.ListGlobalTablesInput{}
@@ -1502,7 +1457,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1511,8 +1465,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/list-tables":
 
+		case "pod.tzzh.dynamodb/list-tables":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ListTablesInput{}
 			inputList := []dynamodb.ListTablesInput{}
@@ -1520,7 +1474,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1529,8 +1482,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/list-tags-of-resource":
 
+		case "pod.tzzh.dynamodb/list-tags-of-resource":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ListTagsOfResourceInput{}
 			inputList := []dynamodb.ListTagsOfResourceInput{}
@@ -1538,7 +1491,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1547,8 +1499,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/put-item":
 
+		case "pod.tzzh.dynamodb/put-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.PutItemInput{}
 			inputList := []dynamodb.PutItemInput{}
@@ -1556,7 +1508,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1565,8 +1516,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/query":
 
+		case "pod.tzzh.dynamodb/query":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.QueryInput{}
 			inputList := []dynamodb.QueryInput{}
@@ -1574,7 +1525,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1583,8 +1533,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/restore-table-from-backup":
 
+		case "pod.tzzh.dynamodb/restore-table-from-backup":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.RestoreTableFromBackupInput{}
 			inputList := []dynamodb.RestoreTableFromBackupInput{}
@@ -1592,7 +1542,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1601,8 +1550,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/restore-table-to-point-in-time":
 
+		case "pod.tzzh.dynamodb/restore-table-to-point-in-time":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.RestoreTableToPointInTimeInput{}
 			inputList := []dynamodb.RestoreTableToPointInTimeInput{}
@@ -1610,7 +1559,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1619,8 +1567,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/scan":
 
+		case "pod.tzzh.dynamodb/scan":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.ScanInput{}
 			inputList := []dynamodb.ScanInput{}
@@ -1628,7 +1576,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1637,8 +1584,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/tag-resource":
 
+		case "pod.tzzh.dynamodb/tag-resource":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.TagResourceInput{}
 			inputList := []dynamodb.TagResourceInput{}
@@ -1646,7 +1593,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1655,8 +1601,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/transact-get-items":
 
+		case "pod.tzzh.dynamodb/transact-get-items":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.TransactGetItemsInput{}
 			inputList := []dynamodb.TransactGetItemsInput{}
@@ -1664,7 +1610,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1673,8 +1618,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/transact-write-items":
 
+		case "pod.tzzh.dynamodb/transact-write-items":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.TransactWriteItemsInput{}
 			inputList := []dynamodb.TransactWriteItemsInput{}
@@ -1682,7 +1627,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1691,8 +1635,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/untag-resource":
 
+		case "pod.tzzh.dynamodb/untag-resource":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UntagResourceInput{}
 			inputList := []dynamodb.UntagResourceInput{}
@@ -1700,7 +1644,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1709,8 +1652,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-continuous-backups":
 
+		case "pod.tzzh.dynamodb/update-continuous-backups":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateContinuousBackupsInput{}
 			inputList := []dynamodb.UpdateContinuousBackupsInput{}
@@ -1718,7 +1661,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1727,8 +1669,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-contributor-insights":
 
+		case "pod.tzzh.dynamodb/update-contributor-insights":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateContributorInsightsInput{}
 			inputList := []dynamodb.UpdateContributorInsightsInput{}
@@ -1736,7 +1678,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1745,8 +1686,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-global-table":
 
+		case "pod.tzzh.dynamodb/update-global-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateGlobalTableInput{}
 			inputList := []dynamodb.UpdateGlobalTableInput{}
@@ -1754,7 +1695,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1763,8 +1703,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-global-table-settings":
 
+		case "pod.tzzh.dynamodb/update-global-table-settings":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateGlobalTableSettingsInput{}
 			inputList := []dynamodb.UpdateGlobalTableSettingsInput{}
@@ -1772,7 +1712,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1781,8 +1720,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-item":
 
+		case "pod.tzzh.dynamodb/update-item":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateItemInput{}
 			inputList := []dynamodb.UpdateItemInput{}
@@ -1790,7 +1729,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1799,8 +1737,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-table":
 
+		case "pod.tzzh.dynamodb/update-table":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateTableInput{}
 			inputList := []dynamodb.UpdateTableInput{}
@@ -1808,7 +1746,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1817,8 +1754,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-table-replica-auto-scaling":
 
+		case "pod.tzzh.dynamodb/update-table-replica-auto-scaling":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateTableReplicaAutoScalingInput{}
 			inputList := []dynamodb.UpdateTableReplicaAutoScalingInput{}
@@ -1826,7 +1763,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1835,8 +1771,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.dynamodb/update-time-to-live":
 
+		case "pod.tzzh.dynamodb/update-time-to-live":
 			svc := dynamodb.New(session.New())
 			input := &dynamodb.UpdateTimeToLiveInput{}
 			inputList := []dynamodb.UpdateTimeToLiveInput{}
@@ -1844,7 +1780,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1853,8 +1788,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-create-partition":
 
+		case "pod.tzzh.glue/batch-create-partition":
 			svc := glue.New(session.New())
 			input := &glue.BatchCreatePartitionInput{}
 			inputList := []glue.BatchCreatePartitionInput{}
@@ -1862,7 +1797,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1871,8 +1805,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-delete-connection":
 
+		case "pod.tzzh.glue/batch-delete-connection":
 			svc := glue.New(session.New())
 			input := &glue.BatchDeleteConnectionInput{}
 			inputList := []glue.BatchDeleteConnectionInput{}
@@ -1880,7 +1814,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1889,8 +1822,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-delete-partition":
 
+		case "pod.tzzh.glue/batch-delete-partition":
 			svc := glue.New(session.New())
 			input := &glue.BatchDeletePartitionInput{}
 			inputList := []glue.BatchDeletePartitionInput{}
@@ -1898,7 +1831,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1907,8 +1839,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-delete-table":
 
+		case "pod.tzzh.glue/batch-delete-table":
 			svc := glue.New(session.New())
 			input := &glue.BatchDeleteTableInput{}
 			inputList := []glue.BatchDeleteTableInput{}
@@ -1916,7 +1848,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1925,8 +1856,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-delete-table-version":
 
+		case "pod.tzzh.glue/batch-delete-table-version":
 			svc := glue.New(session.New())
 			input := &glue.BatchDeleteTableVersionInput{}
 			inputList := []glue.BatchDeleteTableVersionInput{}
@@ -1934,7 +1865,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1943,8 +1873,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-crawlers":
 
+		case "pod.tzzh.glue/batch-get-crawlers":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetCrawlersInput{}
 			inputList := []glue.BatchGetCrawlersInput{}
@@ -1952,7 +1882,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1961,8 +1890,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-dev-endpoints":
 
+		case "pod.tzzh.glue/batch-get-dev-endpoints":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetDevEndpointsInput{}
 			inputList := []glue.BatchGetDevEndpointsInput{}
@@ -1970,7 +1899,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1979,8 +1907,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-jobs":
 
+		case "pod.tzzh.glue/batch-get-jobs":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetJobsInput{}
 			inputList := []glue.BatchGetJobsInput{}
@@ -1988,7 +1916,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -1997,8 +1924,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-partition":
 
+		case "pod.tzzh.glue/batch-get-partition":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetPartitionInput{}
 			inputList := []glue.BatchGetPartitionInput{}
@@ -2006,7 +1933,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2015,8 +1941,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-triggers":
 
+		case "pod.tzzh.glue/batch-get-triggers":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetTriggersInput{}
 			inputList := []glue.BatchGetTriggersInput{}
@@ -2024,7 +1950,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2033,8 +1958,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-get-workflows":
 
+		case "pod.tzzh.glue/batch-get-workflows":
 			svc := glue.New(session.New())
 			input := &glue.BatchGetWorkflowsInput{}
 			inputList := []glue.BatchGetWorkflowsInput{}
@@ -2042,7 +1967,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2051,8 +1975,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-stop-job-run":
 
+		case "pod.tzzh.glue/batch-stop-job-run":
 			svc := glue.New(session.New())
 			input := &glue.BatchStopJobRunInput{}
 			inputList := []glue.BatchStopJobRunInput{}
@@ -2060,7 +1984,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2069,8 +1992,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/batch-update-partition":
 
+		case "pod.tzzh.glue/batch-update-partition":
 			svc := glue.New(session.New())
 			input := &glue.BatchUpdatePartitionInput{}
 			inputList := []glue.BatchUpdatePartitionInput{}
@@ -2078,7 +2001,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2087,8 +2009,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/cancel-m-l-task-run":
 
+		case "pod.tzzh.glue/cancel-m-l-task-run":
 			svc := glue.New(session.New())
 			input := &glue.CancelMLTaskRunInput{}
 			inputList := []glue.CancelMLTaskRunInput{}
@@ -2096,7 +2018,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2105,8 +2026,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-classifier":
 
+		case "pod.tzzh.glue/create-classifier":
 			svc := glue.New(session.New())
 			input := &glue.CreateClassifierInput{}
 			inputList := []glue.CreateClassifierInput{}
@@ -2114,7 +2035,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2123,8 +2043,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-connection":
 
+		case "pod.tzzh.glue/create-connection":
 			svc := glue.New(session.New())
 			input := &glue.CreateConnectionInput{}
 			inputList := []glue.CreateConnectionInput{}
@@ -2132,7 +2052,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2141,8 +2060,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-crawler":
 
+		case "pod.tzzh.glue/create-crawler":
 			svc := glue.New(session.New())
 			input := &glue.CreateCrawlerInput{}
 			inputList := []glue.CreateCrawlerInput{}
@@ -2150,7 +2069,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2159,8 +2077,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-database":
 
+		case "pod.tzzh.glue/create-database":
 			svc := glue.New(session.New())
 			input := &glue.CreateDatabaseInput{}
 			inputList := []glue.CreateDatabaseInput{}
@@ -2168,7 +2086,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2177,8 +2094,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-dev-endpoint":
 
+		case "pod.tzzh.glue/create-dev-endpoint":
 			svc := glue.New(session.New())
 			input := &glue.CreateDevEndpointInput{}
 			inputList := []glue.CreateDevEndpointInput{}
@@ -2186,7 +2103,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2195,8 +2111,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-job":
 
+		case "pod.tzzh.glue/create-job":
 			svc := glue.New(session.New())
 			input := &glue.CreateJobInput{}
 			inputList := []glue.CreateJobInput{}
@@ -2204,7 +2120,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2213,8 +2128,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-m-l-transform":
 
+		case "pod.tzzh.glue/create-m-l-transform":
 			svc := glue.New(session.New())
 			input := &glue.CreateMLTransformInput{}
 			inputList := []glue.CreateMLTransformInput{}
@@ -2222,7 +2137,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2231,8 +2145,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-partition":
 
+		case "pod.tzzh.glue/create-partition":
 			svc := glue.New(session.New())
 			input := &glue.CreatePartitionInput{}
 			inputList := []glue.CreatePartitionInput{}
@@ -2240,7 +2154,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2249,8 +2162,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-script":
 
+		case "pod.tzzh.glue/create-script":
 			svc := glue.New(session.New())
 			input := &glue.CreateScriptInput{}
 			inputList := []glue.CreateScriptInput{}
@@ -2258,7 +2171,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2267,8 +2179,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-security-configuration":
 
+		case "pod.tzzh.glue/create-security-configuration":
 			svc := glue.New(session.New())
 			input := &glue.CreateSecurityConfigurationInput{}
 			inputList := []glue.CreateSecurityConfigurationInput{}
@@ -2276,7 +2188,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2285,8 +2196,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-table":
 
+		case "pod.tzzh.glue/create-table":
 			svc := glue.New(session.New())
 			input := &glue.CreateTableInput{}
 			inputList := []glue.CreateTableInput{}
@@ -2294,7 +2205,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2303,8 +2213,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-trigger":
 
+		case "pod.tzzh.glue/create-trigger":
 			svc := glue.New(session.New())
 			input := &glue.CreateTriggerInput{}
 			inputList := []glue.CreateTriggerInput{}
@@ -2312,7 +2222,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2321,8 +2230,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-user-defined-function":
 
+		case "pod.tzzh.glue/create-user-defined-function":
 			svc := glue.New(session.New())
 			input := &glue.CreateUserDefinedFunctionInput{}
 			inputList := []glue.CreateUserDefinedFunctionInput{}
@@ -2330,7 +2239,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2339,8 +2247,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/create-workflow":
 
+		case "pod.tzzh.glue/create-workflow":
 			svc := glue.New(session.New())
 			input := &glue.CreateWorkflowInput{}
 			inputList := []glue.CreateWorkflowInput{}
@@ -2348,7 +2256,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2357,8 +2264,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-classifier":
 
+		case "pod.tzzh.glue/delete-classifier":
 			svc := glue.New(session.New())
 			input := &glue.DeleteClassifierInput{}
 			inputList := []glue.DeleteClassifierInput{}
@@ -2366,7 +2273,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2375,8 +2281,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-column-statistics-for-partition":
 
+		case "pod.tzzh.glue/delete-column-statistics-for-partition":
 			svc := glue.New(session.New())
 			input := &glue.DeleteColumnStatisticsForPartitionInput{}
 			inputList := []glue.DeleteColumnStatisticsForPartitionInput{}
@@ -2384,7 +2290,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2393,8 +2298,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-column-statistics-for-table":
 
+		case "pod.tzzh.glue/delete-column-statistics-for-table":
 			svc := glue.New(session.New())
 			input := &glue.DeleteColumnStatisticsForTableInput{}
 			inputList := []glue.DeleteColumnStatisticsForTableInput{}
@@ -2402,7 +2307,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2411,8 +2315,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-connection":
 
+		case "pod.tzzh.glue/delete-connection":
 			svc := glue.New(session.New())
 			input := &glue.DeleteConnectionInput{}
 			inputList := []glue.DeleteConnectionInput{}
@@ -2420,7 +2324,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2429,8 +2332,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-crawler":
 
+		case "pod.tzzh.glue/delete-crawler":
 			svc := glue.New(session.New())
 			input := &glue.DeleteCrawlerInput{}
 			inputList := []glue.DeleteCrawlerInput{}
@@ -2438,7 +2341,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2447,8 +2349,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-database":
 
+		case "pod.tzzh.glue/delete-database":
 			svc := glue.New(session.New())
 			input := &glue.DeleteDatabaseInput{}
 			inputList := []glue.DeleteDatabaseInput{}
@@ -2456,7 +2358,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2465,8 +2366,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-dev-endpoint":
 
+		case "pod.tzzh.glue/delete-dev-endpoint":
 			svc := glue.New(session.New())
 			input := &glue.DeleteDevEndpointInput{}
 			inputList := []glue.DeleteDevEndpointInput{}
@@ -2474,7 +2375,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2483,8 +2383,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-job":
 
+		case "pod.tzzh.glue/delete-job":
 			svc := glue.New(session.New())
 			input := &glue.DeleteJobInput{}
 			inputList := []glue.DeleteJobInput{}
@@ -2492,7 +2392,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2501,8 +2400,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-m-l-transform":
 
+		case "pod.tzzh.glue/delete-m-l-transform":
 			svc := glue.New(session.New())
 			input := &glue.DeleteMLTransformInput{}
 			inputList := []glue.DeleteMLTransformInput{}
@@ -2510,7 +2409,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2519,8 +2417,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-partition":
 
+		case "pod.tzzh.glue/delete-partition":
 			svc := glue.New(session.New())
 			input := &glue.DeletePartitionInput{}
 			inputList := []glue.DeletePartitionInput{}
@@ -2528,7 +2426,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2537,8 +2434,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-resource-policy":
 
+		case "pod.tzzh.glue/delete-resource-policy":
 			svc := glue.New(session.New())
 			input := &glue.DeleteResourcePolicyInput{}
 			inputList := []glue.DeleteResourcePolicyInput{}
@@ -2546,7 +2443,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2555,8 +2451,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-security-configuration":
 
+		case "pod.tzzh.glue/delete-security-configuration":
 			svc := glue.New(session.New())
 			input := &glue.DeleteSecurityConfigurationInput{}
 			inputList := []glue.DeleteSecurityConfigurationInput{}
@@ -2564,7 +2460,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2573,8 +2468,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-table":
 
+		case "pod.tzzh.glue/delete-table":
 			svc := glue.New(session.New())
 			input := &glue.DeleteTableInput{}
 			inputList := []glue.DeleteTableInput{}
@@ -2582,7 +2477,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2591,8 +2485,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-table-version":
 
+		case "pod.tzzh.glue/delete-table-version":
 			svc := glue.New(session.New())
 			input := &glue.DeleteTableVersionInput{}
 			inputList := []glue.DeleteTableVersionInput{}
@@ -2600,7 +2494,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2609,8 +2502,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-trigger":
 
+		case "pod.tzzh.glue/delete-trigger":
 			svc := glue.New(session.New())
 			input := &glue.DeleteTriggerInput{}
 			inputList := []glue.DeleteTriggerInput{}
@@ -2618,7 +2511,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2627,8 +2519,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-user-defined-function":
 
+		case "pod.tzzh.glue/delete-user-defined-function":
 			svc := glue.New(session.New())
 			input := &glue.DeleteUserDefinedFunctionInput{}
 			inputList := []glue.DeleteUserDefinedFunctionInput{}
@@ -2636,7 +2528,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2645,8 +2536,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/delete-workflow":
 
+		case "pod.tzzh.glue/delete-workflow":
 			svc := glue.New(session.New())
 			input := &glue.DeleteWorkflowInput{}
 			inputList := []glue.DeleteWorkflowInput{}
@@ -2654,7 +2545,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2663,8 +2553,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-catalog-import-status":
 
+		case "pod.tzzh.glue/get-catalog-import-status":
 			svc := glue.New(session.New())
 			input := &glue.GetCatalogImportStatusInput{}
 			inputList := []glue.GetCatalogImportStatusInput{}
@@ -2672,7 +2562,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2681,8 +2570,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-classifier":
 
+		case "pod.tzzh.glue/get-classifier":
 			svc := glue.New(session.New())
 			input := &glue.GetClassifierInput{}
 			inputList := []glue.GetClassifierInput{}
@@ -2690,7 +2579,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2699,8 +2587,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-classifiers":
 
+		case "pod.tzzh.glue/get-classifiers":
 			svc := glue.New(session.New())
 			input := &glue.GetClassifiersInput{}
 			inputList := []glue.GetClassifiersInput{}
@@ -2708,7 +2596,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2717,8 +2604,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-column-statistics-for-partition":
 
+		case "pod.tzzh.glue/get-column-statistics-for-partition":
 			svc := glue.New(session.New())
 			input := &glue.GetColumnStatisticsForPartitionInput{}
 			inputList := []glue.GetColumnStatisticsForPartitionInput{}
@@ -2726,7 +2613,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2735,8 +2621,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-column-statistics-for-table":
 
+		case "pod.tzzh.glue/get-column-statistics-for-table":
 			svc := glue.New(session.New())
 			input := &glue.GetColumnStatisticsForTableInput{}
 			inputList := []glue.GetColumnStatisticsForTableInput{}
@@ -2744,7 +2630,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2753,8 +2638,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-connection":
 
+		case "pod.tzzh.glue/get-connection":
 			svc := glue.New(session.New())
 			input := &glue.GetConnectionInput{}
 			inputList := []glue.GetConnectionInput{}
@@ -2762,7 +2647,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2771,8 +2655,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-connections":
 
+		case "pod.tzzh.glue/get-connections":
 			svc := glue.New(session.New())
 			input := &glue.GetConnectionsInput{}
 			inputList := []glue.GetConnectionsInput{}
@@ -2780,7 +2664,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2789,8 +2672,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-crawler":
 
+		case "pod.tzzh.glue/get-crawler":
 			svc := glue.New(session.New())
 			input := &glue.GetCrawlerInput{}
 			inputList := []glue.GetCrawlerInput{}
@@ -2798,7 +2681,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2807,8 +2689,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-crawler-metrics":
 
+		case "pod.tzzh.glue/get-crawler-metrics":
 			svc := glue.New(session.New())
 			input := &glue.GetCrawlerMetricsInput{}
 			inputList := []glue.GetCrawlerMetricsInput{}
@@ -2816,7 +2698,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2825,8 +2706,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-crawlers":
 
+		case "pod.tzzh.glue/get-crawlers":
 			svc := glue.New(session.New())
 			input := &glue.GetCrawlersInput{}
 			inputList := []glue.GetCrawlersInput{}
@@ -2834,7 +2715,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2843,8 +2723,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-data-catalog-encryption-settings":
 
+		case "pod.tzzh.glue/get-data-catalog-encryption-settings":
 			svc := glue.New(session.New())
 			input := &glue.GetDataCatalogEncryptionSettingsInput{}
 			inputList := []glue.GetDataCatalogEncryptionSettingsInput{}
@@ -2852,7 +2732,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2861,8 +2740,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-database":
 
+		case "pod.tzzh.glue/get-database":
 			svc := glue.New(session.New())
 			input := &glue.GetDatabaseInput{}
 			inputList := []glue.GetDatabaseInput{}
@@ -2870,7 +2749,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2879,8 +2757,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-databases":
 
+		case "pod.tzzh.glue/get-databases":
 			svc := glue.New(session.New())
 			input := &glue.GetDatabasesInput{}
 			inputList := []glue.GetDatabasesInput{}
@@ -2888,7 +2766,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2897,8 +2774,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-dataflow-graph":
 
+		case "pod.tzzh.glue/get-dataflow-graph":
 			svc := glue.New(session.New())
 			input := &glue.GetDataflowGraphInput{}
 			inputList := []glue.GetDataflowGraphInput{}
@@ -2906,7 +2783,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2915,8 +2791,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-dev-endpoint":
 
+		case "pod.tzzh.glue/get-dev-endpoint":
 			svc := glue.New(session.New())
 			input := &glue.GetDevEndpointInput{}
 			inputList := []glue.GetDevEndpointInput{}
@@ -2924,7 +2800,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2933,8 +2808,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-dev-endpoints":
 
+		case "pod.tzzh.glue/get-dev-endpoints":
 			svc := glue.New(session.New())
 			input := &glue.GetDevEndpointsInput{}
 			inputList := []glue.GetDevEndpointsInput{}
@@ -2942,7 +2817,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2951,8 +2825,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-job":
 
+		case "pod.tzzh.glue/get-job":
 			svc := glue.New(session.New())
 			input := &glue.GetJobInput{}
 			inputList := []glue.GetJobInput{}
@@ -2960,7 +2834,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2969,8 +2842,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-job-bookmark":
 
+		case "pod.tzzh.glue/get-job-bookmark":
 			svc := glue.New(session.New())
 			input := &glue.GetJobBookmarkInput{}
 			inputList := []glue.GetJobBookmarkInput{}
@@ -2978,7 +2851,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -2987,8 +2859,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-job-run":
 
+		case "pod.tzzh.glue/get-job-run":
 			svc := glue.New(session.New())
 			input := &glue.GetJobRunInput{}
 			inputList := []glue.GetJobRunInput{}
@@ -2996,7 +2868,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3005,8 +2876,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-job-runs":
 
+		case "pod.tzzh.glue/get-job-runs":
 			svc := glue.New(session.New())
 			input := &glue.GetJobRunsInput{}
 			inputList := []glue.GetJobRunsInput{}
@@ -3014,7 +2885,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3023,8 +2893,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-jobs":
 
+		case "pod.tzzh.glue/get-jobs":
 			svc := glue.New(session.New())
 			input := &glue.GetJobsInput{}
 			inputList := []glue.GetJobsInput{}
@@ -3032,7 +2902,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3041,8 +2910,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-m-l-task-run":
 
+		case "pod.tzzh.glue/get-m-l-task-run":
 			svc := glue.New(session.New())
 			input := &glue.GetMLTaskRunInput{}
 			inputList := []glue.GetMLTaskRunInput{}
@@ -3050,7 +2919,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3059,8 +2927,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-m-l-task-runs":
 
+		case "pod.tzzh.glue/get-m-l-task-runs":
 			svc := glue.New(session.New())
 			input := &glue.GetMLTaskRunsInput{}
 			inputList := []glue.GetMLTaskRunsInput{}
@@ -3068,7 +2936,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3077,8 +2944,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-m-l-transform":
 
+		case "pod.tzzh.glue/get-m-l-transform":
 			svc := glue.New(session.New())
 			input := &glue.GetMLTransformInput{}
 			inputList := []glue.GetMLTransformInput{}
@@ -3086,7 +2953,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3095,8 +2961,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-m-l-transforms":
 
+		case "pod.tzzh.glue/get-m-l-transforms":
 			svc := glue.New(session.New())
 			input := &glue.GetMLTransformsInput{}
 			inputList := []glue.GetMLTransformsInput{}
@@ -3104,7 +2970,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3113,8 +2978,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-mapping":
 
+		case "pod.tzzh.glue/get-mapping":
 			svc := glue.New(session.New())
 			input := &glue.GetMappingInput{}
 			inputList := []glue.GetMappingInput{}
@@ -3122,7 +2987,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3131,8 +2995,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-partition":
 
+		case "pod.tzzh.glue/get-partition":
 			svc := glue.New(session.New())
 			input := &glue.GetPartitionInput{}
 			inputList := []glue.GetPartitionInput{}
@@ -3140,7 +3004,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3149,8 +3012,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-partition-indexes":
 
+		case "pod.tzzh.glue/get-partition-indexes":
 			svc := glue.New(session.New())
 			input := &glue.GetPartitionIndexesInput{}
 			inputList := []glue.GetPartitionIndexesInput{}
@@ -3158,7 +3021,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3167,8 +3029,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-partitions":
 
+		case "pod.tzzh.glue/get-partitions":
 			svc := glue.New(session.New())
 			input := &glue.GetPartitionsInput{}
 			inputList := []glue.GetPartitionsInput{}
@@ -3176,7 +3038,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3185,8 +3046,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-plan":
 
+		case "pod.tzzh.glue/get-plan":
 			svc := glue.New(session.New())
 			input := &glue.GetPlanInput{}
 			inputList := []glue.GetPlanInput{}
@@ -3194,7 +3055,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3203,8 +3063,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-resource-policies":
 
+		case "pod.tzzh.glue/get-resource-policies":
 			svc := glue.New(session.New())
 			input := &glue.GetResourcePoliciesInput{}
 			inputList := []glue.GetResourcePoliciesInput{}
@@ -3212,7 +3072,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3221,8 +3080,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-resource-policy":
 
+		case "pod.tzzh.glue/get-resource-policy":
 			svc := glue.New(session.New())
 			input := &glue.GetResourcePolicyInput{}
 			inputList := []glue.GetResourcePolicyInput{}
@@ -3230,7 +3089,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3239,8 +3097,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-security-configuration":
 
+		case "pod.tzzh.glue/get-security-configuration":
 			svc := glue.New(session.New())
 			input := &glue.GetSecurityConfigurationInput{}
 			inputList := []glue.GetSecurityConfigurationInput{}
@@ -3248,7 +3106,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3257,8 +3114,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-security-configurations":
 
+		case "pod.tzzh.glue/get-security-configurations":
 			svc := glue.New(session.New())
 			input := &glue.GetSecurityConfigurationsInput{}
 			inputList := []glue.GetSecurityConfigurationsInput{}
@@ -3266,7 +3123,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3275,8 +3131,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-table":
 
+		case "pod.tzzh.glue/get-table":
 			svc := glue.New(session.New())
 			input := &glue.GetTableInput{}
 			inputList := []glue.GetTableInput{}
@@ -3284,7 +3140,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3293,8 +3148,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-table-version":
 
+		case "pod.tzzh.glue/get-table-version":
 			svc := glue.New(session.New())
 			input := &glue.GetTableVersionInput{}
 			inputList := []glue.GetTableVersionInput{}
@@ -3302,7 +3157,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3311,8 +3165,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-table-versions":
 
+		case "pod.tzzh.glue/get-table-versions":
 			svc := glue.New(session.New())
 			input := &glue.GetTableVersionsInput{}
 			inputList := []glue.GetTableVersionsInput{}
@@ -3320,7 +3174,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3329,8 +3182,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-tables":
 
+		case "pod.tzzh.glue/get-tables":
 			svc := glue.New(session.New())
 			input := &glue.GetTablesInput{}
 			inputList := []glue.GetTablesInput{}
@@ -3338,7 +3191,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3347,8 +3199,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-tags":
 
+		case "pod.tzzh.glue/get-tags":
 			svc := glue.New(session.New())
 			input := &glue.GetTagsInput{}
 			inputList := []glue.GetTagsInput{}
@@ -3356,7 +3208,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3365,8 +3216,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-trigger":
 
+		case "pod.tzzh.glue/get-trigger":
 			svc := glue.New(session.New())
 			input := &glue.GetTriggerInput{}
 			inputList := []glue.GetTriggerInput{}
@@ -3374,7 +3225,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3383,8 +3233,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-triggers":
 
+		case "pod.tzzh.glue/get-triggers":
 			svc := glue.New(session.New())
 			input := &glue.GetTriggersInput{}
 			inputList := []glue.GetTriggersInput{}
@@ -3392,7 +3242,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3401,8 +3250,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-user-defined-function":
 
+		case "pod.tzzh.glue/get-user-defined-function":
 			svc := glue.New(session.New())
 			input := &glue.GetUserDefinedFunctionInput{}
 			inputList := []glue.GetUserDefinedFunctionInput{}
@@ -3410,7 +3259,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3419,8 +3267,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-user-defined-functions":
 
+		case "pod.tzzh.glue/get-user-defined-functions":
 			svc := glue.New(session.New())
 			input := &glue.GetUserDefinedFunctionsInput{}
 			inputList := []glue.GetUserDefinedFunctionsInput{}
@@ -3428,7 +3276,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3437,8 +3284,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-workflow":
 
+		case "pod.tzzh.glue/get-workflow":
 			svc := glue.New(session.New())
 			input := &glue.GetWorkflowInput{}
 			inputList := []glue.GetWorkflowInput{}
@@ -3446,7 +3293,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3455,8 +3301,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-workflow-run":
 
+		case "pod.tzzh.glue/get-workflow-run":
 			svc := glue.New(session.New())
 			input := &glue.GetWorkflowRunInput{}
 			inputList := []glue.GetWorkflowRunInput{}
@@ -3464,7 +3310,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3473,8 +3318,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-workflow-run-properties":
 
+		case "pod.tzzh.glue/get-workflow-run-properties":
 			svc := glue.New(session.New())
 			input := &glue.GetWorkflowRunPropertiesInput{}
 			inputList := []glue.GetWorkflowRunPropertiesInput{}
@@ -3482,7 +3327,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3491,8 +3335,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/get-workflow-runs":
 
+		case "pod.tzzh.glue/get-workflow-runs":
 			svc := glue.New(session.New())
 			input := &glue.GetWorkflowRunsInput{}
 			inputList := []glue.GetWorkflowRunsInput{}
@@ -3500,7 +3344,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3509,8 +3352,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/import-catalog-to-glue":
 
+		case "pod.tzzh.glue/import-catalog-to-glue":
 			svc := glue.New(session.New())
 			input := &glue.ImportCatalogToGlueInput{}
 			inputList := []glue.ImportCatalogToGlueInput{}
@@ -3518,7 +3361,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3527,8 +3369,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-crawlers":
 
+		case "pod.tzzh.glue/list-crawlers":
 			svc := glue.New(session.New())
 			input := &glue.ListCrawlersInput{}
 			inputList := []glue.ListCrawlersInput{}
@@ -3536,7 +3378,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3545,8 +3386,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-dev-endpoints":
 
+		case "pod.tzzh.glue/list-dev-endpoints":
 			svc := glue.New(session.New())
 			input := &glue.ListDevEndpointsInput{}
 			inputList := []glue.ListDevEndpointsInput{}
@@ -3554,7 +3395,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3563,8 +3403,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-jobs":
 
+		case "pod.tzzh.glue/list-jobs":
 			svc := glue.New(session.New())
 			input := &glue.ListJobsInput{}
 			inputList := []glue.ListJobsInput{}
@@ -3572,7 +3412,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3581,8 +3420,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-m-l-transforms":
 
+		case "pod.tzzh.glue/list-m-l-transforms":
 			svc := glue.New(session.New())
 			input := &glue.ListMLTransformsInput{}
 			inputList := []glue.ListMLTransformsInput{}
@@ -3590,7 +3429,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3599,8 +3437,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-triggers":
 
+		case "pod.tzzh.glue/list-triggers":
 			svc := glue.New(session.New())
 			input := &glue.ListTriggersInput{}
 			inputList := []glue.ListTriggersInput{}
@@ -3608,7 +3446,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3617,8 +3454,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/list-workflows":
 
+		case "pod.tzzh.glue/list-workflows":
 			svc := glue.New(session.New())
 			input := &glue.ListWorkflowsInput{}
 			inputList := []glue.ListWorkflowsInput{}
@@ -3626,7 +3463,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3635,8 +3471,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/put-data-catalog-encryption-settings":
 
+		case "pod.tzzh.glue/put-data-catalog-encryption-settings":
 			svc := glue.New(session.New())
 			input := &glue.PutDataCatalogEncryptionSettingsInput{}
 			inputList := []glue.PutDataCatalogEncryptionSettingsInput{}
@@ -3644,7 +3480,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3653,8 +3488,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/put-resource-policy":
 
+		case "pod.tzzh.glue/put-resource-policy":
 			svc := glue.New(session.New())
 			input := &glue.PutResourcePolicyInput{}
 			inputList := []glue.PutResourcePolicyInput{}
@@ -3662,7 +3497,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3671,8 +3505,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/put-workflow-run-properties":
 
+		case "pod.tzzh.glue/put-workflow-run-properties":
 			svc := glue.New(session.New())
 			input := &glue.PutWorkflowRunPropertiesInput{}
 			inputList := []glue.PutWorkflowRunPropertiesInput{}
@@ -3680,7 +3514,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3689,8 +3522,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/reset-job-bookmark":
 
+		case "pod.tzzh.glue/reset-job-bookmark":
 			svc := glue.New(session.New())
 			input := &glue.ResetJobBookmarkInput{}
 			inputList := []glue.ResetJobBookmarkInput{}
@@ -3698,7 +3531,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3707,8 +3539,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/resume-workflow-run":
 
+		case "pod.tzzh.glue/resume-workflow-run":
 			svc := glue.New(session.New())
 			input := &glue.ResumeWorkflowRunInput{}
 			inputList := []glue.ResumeWorkflowRunInput{}
@@ -3716,7 +3548,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3725,8 +3556,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/search-tables":
 
+		case "pod.tzzh.glue/search-tables":
 			svc := glue.New(session.New())
 			input := &glue.SearchTablesInput{}
 			inputList := []glue.SearchTablesInput{}
@@ -3734,7 +3565,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3743,8 +3573,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-crawler":
 
+		case "pod.tzzh.glue/start-crawler":
 			svc := glue.New(session.New())
 			input := &glue.StartCrawlerInput{}
 			inputList := []glue.StartCrawlerInput{}
@@ -3752,7 +3582,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3761,8 +3590,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-crawler-schedule":
 
+		case "pod.tzzh.glue/start-crawler-schedule":
 			svc := glue.New(session.New())
 			input := &glue.StartCrawlerScheduleInput{}
 			inputList := []glue.StartCrawlerScheduleInput{}
@@ -3770,7 +3599,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3779,8 +3607,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-export-labels-task-run":
 
+		case "pod.tzzh.glue/start-export-labels-task-run":
 			svc := glue.New(session.New())
 			input := &glue.StartExportLabelsTaskRunInput{}
 			inputList := []glue.StartExportLabelsTaskRunInput{}
@@ -3788,7 +3616,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3797,8 +3624,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-import-labels-task-run":
 
+		case "pod.tzzh.glue/start-import-labels-task-run":
 			svc := glue.New(session.New())
 			input := &glue.StartImportLabelsTaskRunInput{}
 			inputList := []glue.StartImportLabelsTaskRunInput{}
@@ -3806,7 +3633,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3815,8 +3641,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-job-run":
 
+		case "pod.tzzh.glue/start-job-run":
 			svc := glue.New(session.New())
 			input := &glue.StartJobRunInput{}
 			inputList := []glue.StartJobRunInput{}
@@ -3824,7 +3650,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3833,8 +3658,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-m-l-evaluation-task-run":
 
+		case "pod.tzzh.glue/start-m-l-evaluation-task-run":
 			svc := glue.New(session.New())
 			input := &glue.StartMLEvaluationTaskRunInput{}
 			inputList := []glue.StartMLEvaluationTaskRunInput{}
@@ -3842,7 +3667,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3851,8 +3675,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-m-l-labeling-set-generation-task-run":
 
+		case "pod.tzzh.glue/start-m-l-labeling-set-generation-task-run":
 			svc := glue.New(session.New())
 			input := &glue.StartMLLabelingSetGenerationTaskRunInput{}
 			inputList := []glue.StartMLLabelingSetGenerationTaskRunInput{}
@@ -3860,7 +3684,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3869,8 +3692,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-trigger":
 
+		case "pod.tzzh.glue/start-trigger":
 			svc := glue.New(session.New())
 			input := &glue.StartTriggerInput{}
 			inputList := []glue.StartTriggerInput{}
@@ -3878,7 +3701,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3887,8 +3709,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/start-workflow-run":
 
+		case "pod.tzzh.glue/start-workflow-run":
 			svc := glue.New(session.New())
 			input := &glue.StartWorkflowRunInput{}
 			inputList := []glue.StartWorkflowRunInput{}
@@ -3896,7 +3718,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3905,8 +3726,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/stop-crawler":
 
+		case "pod.tzzh.glue/stop-crawler":
 			svc := glue.New(session.New())
 			input := &glue.StopCrawlerInput{}
 			inputList := []glue.StopCrawlerInput{}
@@ -3914,7 +3735,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3923,8 +3743,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/stop-crawler-schedule":
 
+		case "pod.tzzh.glue/stop-crawler-schedule":
 			svc := glue.New(session.New())
 			input := &glue.StopCrawlerScheduleInput{}
 			inputList := []glue.StopCrawlerScheduleInput{}
@@ -3932,7 +3752,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3941,8 +3760,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/stop-trigger":
 
+		case "pod.tzzh.glue/stop-trigger":
 			svc := glue.New(session.New())
 			input := &glue.StopTriggerInput{}
 			inputList := []glue.StopTriggerInput{}
@@ -3950,7 +3769,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3959,8 +3777,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/stop-workflow-run":
 
+		case "pod.tzzh.glue/stop-workflow-run":
 			svc := glue.New(session.New())
 			input := &glue.StopWorkflowRunInput{}
 			inputList := []glue.StopWorkflowRunInput{}
@@ -3968,7 +3786,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3977,8 +3794,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/tag-resource":
 
+		case "pod.tzzh.glue/tag-resource":
 			svc := glue.New(session.New())
 			input := &glue.TagResourceInput{}
 			inputList := []glue.TagResourceInput{}
@@ -3986,7 +3803,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -3995,8 +3811,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/untag-resource":
 
+		case "pod.tzzh.glue/untag-resource":
 			svc := glue.New(session.New())
 			input := &glue.UntagResourceInput{}
 			inputList := []glue.UntagResourceInput{}
@@ -4004,7 +3820,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4013,8 +3828,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-classifier":
 
+		case "pod.tzzh.glue/update-classifier":
 			svc := glue.New(session.New())
 			input := &glue.UpdateClassifierInput{}
 			inputList := []glue.UpdateClassifierInput{}
@@ -4022,7 +3837,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4031,8 +3845,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-column-statistics-for-partition":
 
+		case "pod.tzzh.glue/update-column-statistics-for-partition":
 			svc := glue.New(session.New())
 			input := &glue.UpdateColumnStatisticsForPartitionInput{}
 			inputList := []glue.UpdateColumnStatisticsForPartitionInput{}
@@ -4040,7 +3854,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4049,8 +3862,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-column-statistics-for-table":
 
+		case "pod.tzzh.glue/update-column-statistics-for-table":
 			svc := glue.New(session.New())
 			input := &glue.UpdateColumnStatisticsForTableInput{}
 			inputList := []glue.UpdateColumnStatisticsForTableInput{}
@@ -4058,7 +3871,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4067,8 +3879,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-connection":
 
+		case "pod.tzzh.glue/update-connection":
 			svc := glue.New(session.New())
 			input := &glue.UpdateConnectionInput{}
 			inputList := []glue.UpdateConnectionInput{}
@@ -4076,7 +3888,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4085,8 +3896,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-crawler":
 
+		case "pod.tzzh.glue/update-crawler":
 			svc := glue.New(session.New())
 			input := &glue.UpdateCrawlerInput{}
 			inputList := []glue.UpdateCrawlerInput{}
@@ -4094,7 +3905,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4103,8 +3913,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-crawler-schedule":
 
+		case "pod.tzzh.glue/update-crawler-schedule":
 			svc := glue.New(session.New())
 			input := &glue.UpdateCrawlerScheduleInput{}
 			inputList := []glue.UpdateCrawlerScheduleInput{}
@@ -4112,7 +3922,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4121,8 +3930,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-database":
 
+		case "pod.tzzh.glue/update-database":
 			svc := glue.New(session.New())
 			input := &glue.UpdateDatabaseInput{}
 			inputList := []glue.UpdateDatabaseInput{}
@@ -4130,7 +3939,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4139,8 +3947,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-dev-endpoint":
 
+		case "pod.tzzh.glue/update-dev-endpoint":
 			svc := glue.New(session.New())
 			input := &glue.UpdateDevEndpointInput{}
 			inputList := []glue.UpdateDevEndpointInput{}
@@ -4148,7 +3956,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4157,8 +3964,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-job":
 
+		case "pod.tzzh.glue/update-job":
 			svc := glue.New(session.New())
 			input := &glue.UpdateJobInput{}
 			inputList := []glue.UpdateJobInput{}
@@ -4166,7 +3973,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4175,8 +3981,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-m-l-transform":
 
+		case "pod.tzzh.glue/update-m-l-transform":
 			svc := glue.New(session.New())
 			input := &glue.UpdateMLTransformInput{}
 			inputList := []glue.UpdateMLTransformInput{}
@@ -4184,7 +3990,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4193,8 +3998,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-partition":
 
+		case "pod.tzzh.glue/update-partition":
 			svc := glue.New(session.New())
 			input := &glue.UpdatePartitionInput{}
 			inputList := []glue.UpdatePartitionInput{}
@@ -4202,7 +4007,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4211,8 +4015,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-table":
 
+		case "pod.tzzh.glue/update-table":
 			svc := glue.New(session.New())
 			input := &glue.UpdateTableInput{}
 			inputList := []glue.UpdateTableInput{}
@@ -4220,7 +4024,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4229,8 +4032,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-trigger":
 
+		case "pod.tzzh.glue/update-trigger":
 			svc := glue.New(session.New())
 			input := &glue.UpdateTriggerInput{}
 			inputList := []glue.UpdateTriggerInput{}
@@ -4238,7 +4041,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4247,8 +4049,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-user-defined-function":
 
+		case "pod.tzzh.glue/update-user-defined-function":
 			svc := glue.New(session.New())
 			input := &glue.UpdateUserDefinedFunctionInput{}
 			inputList := []glue.UpdateUserDefinedFunctionInput{}
@@ -4256,7 +4058,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4265,8 +4066,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.glue/update-workflow":
 
+		case "pod.tzzh.glue/update-workflow":
 			svc := glue.New(session.New())
 			input := &glue.UpdateWorkflowInput{}
 			inputList := []glue.UpdateWorkflowInput{}
@@ -4274,7 +4075,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4283,8 +4083,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/batch-associate-scram-secret":
 
+		case "pod.tzzh.kafka/batch-associate-scram-secret":
 			svc := kafka.New(session.New())
 			input := &kafka.BatchAssociateScramSecretInput{}
 			inputList := []kafka.BatchAssociateScramSecretInput{}
@@ -4292,7 +4092,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4301,8 +4100,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/batch-disassociate-scram-secret":
 
+		case "pod.tzzh.kafka/batch-disassociate-scram-secret":
 			svc := kafka.New(session.New())
 			input := &kafka.BatchDisassociateScramSecretInput{}
 			inputList := []kafka.BatchDisassociateScramSecretInput{}
@@ -4310,7 +4109,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4319,8 +4117,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/create-cluster":
 
+		case "pod.tzzh.kafka/create-cluster":
 			svc := kafka.New(session.New())
 			input := &kafka.CreateClusterInput{}
 			inputList := []kafka.CreateClusterInput{}
@@ -4328,7 +4126,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4337,8 +4134,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/create-configuration":
 
+		case "pod.tzzh.kafka/create-configuration":
 			svc := kafka.New(session.New())
 			input := &kafka.CreateConfigurationInput{}
 			inputList := []kafka.CreateConfigurationInput{}
@@ -4346,7 +4143,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4355,8 +4151,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/delete-cluster":
 
+		case "pod.tzzh.kafka/delete-cluster":
 			svc := kafka.New(session.New())
 			input := &kafka.DeleteClusterInput{}
 			inputList := []kafka.DeleteClusterInput{}
@@ -4364,7 +4160,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4373,8 +4168,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/delete-configuration":
 
+		case "pod.tzzh.kafka/delete-configuration":
 			svc := kafka.New(session.New())
 			input := &kafka.DeleteConfigurationInput{}
 			inputList := []kafka.DeleteConfigurationInput{}
@@ -4382,7 +4177,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4391,8 +4185,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/describe-cluster":
 
+		case "pod.tzzh.kafka/describe-cluster":
 			svc := kafka.New(session.New())
 			input := &kafka.DescribeClusterInput{}
 			inputList := []kafka.DescribeClusterInput{}
@@ -4400,7 +4194,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4409,8 +4202,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/describe-cluster-operation":
 
+		case "pod.tzzh.kafka/describe-cluster-operation":
 			svc := kafka.New(session.New())
 			input := &kafka.DescribeClusterOperationInput{}
 			inputList := []kafka.DescribeClusterOperationInput{}
@@ -4418,7 +4211,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4427,8 +4219,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/describe-configuration":
 
+		case "pod.tzzh.kafka/describe-configuration":
 			svc := kafka.New(session.New())
 			input := &kafka.DescribeConfigurationInput{}
 			inputList := []kafka.DescribeConfigurationInput{}
@@ -4436,7 +4228,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4445,8 +4236,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/describe-configuration-revision":
 
+		case "pod.tzzh.kafka/describe-configuration-revision":
 			svc := kafka.New(session.New())
 			input := &kafka.DescribeConfigurationRevisionInput{}
 			inputList := []kafka.DescribeConfigurationRevisionInput{}
@@ -4454,7 +4245,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4463,8 +4253,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/get-bootstrap-brokers":
 
+		case "pod.tzzh.kafka/get-bootstrap-brokers":
 			svc := kafka.New(session.New())
 			input := &kafka.GetBootstrapBrokersInput{}
 			inputList := []kafka.GetBootstrapBrokersInput{}
@@ -4472,7 +4262,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4481,8 +4270,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/get-compatible-kafka-versions":
 
+		case "pod.tzzh.kafka/get-compatible-kafka-versions":
 			svc := kafka.New(session.New())
 			input := &kafka.GetCompatibleKafkaVersionsInput{}
 			inputList := []kafka.GetCompatibleKafkaVersionsInput{}
@@ -4490,7 +4279,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4499,8 +4287,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-cluster-operations":
 
+		case "pod.tzzh.kafka/list-cluster-operations":
 			svc := kafka.New(session.New())
 			input := &kafka.ListClusterOperationsInput{}
 			inputList := []kafka.ListClusterOperationsInput{}
@@ -4508,7 +4296,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4517,8 +4304,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-clusters":
 
+		case "pod.tzzh.kafka/list-clusters":
 			svc := kafka.New(session.New())
 			input := &kafka.ListClustersInput{}
 			inputList := []kafka.ListClustersInput{}
@@ -4526,7 +4313,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4535,8 +4321,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-configuration-revisions":
 
+		case "pod.tzzh.kafka/list-configuration-revisions":
 			svc := kafka.New(session.New())
 			input := &kafka.ListConfigurationRevisionsInput{}
 			inputList := []kafka.ListConfigurationRevisionsInput{}
@@ -4544,7 +4330,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4553,8 +4338,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-configurations":
 
+		case "pod.tzzh.kafka/list-configurations":
 			svc := kafka.New(session.New())
 			input := &kafka.ListConfigurationsInput{}
 			inputList := []kafka.ListConfigurationsInput{}
@@ -4562,7 +4347,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4571,8 +4355,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-kafka-versions":
 
+		case "pod.tzzh.kafka/list-kafka-versions":
 			svc := kafka.New(session.New())
 			input := &kafka.ListKafkaVersionsInput{}
 			inputList := []kafka.ListKafkaVersionsInput{}
@@ -4580,7 +4364,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4589,8 +4372,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-nodes":
 
+		case "pod.tzzh.kafka/list-nodes":
 			svc := kafka.New(session.New())
 			input := &kafka.ListNodesInput{}
 			inputList := []kafka.ListNodesInput{}
@@ -4598,7 +4381,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4607,8 +4389,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-scram-secrets":
 
+		case "pod.tzzh.kafka/list-scram-secrets":
 			svc := kafka.New(session.New())
 			input := &kafka.ListScramSecretsInput{}
 			inputList := []kafka.ListScramSecretsInput{}
@@ -4616,7 +4398,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4625,8 +4406,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/list-tags-for-resource":
 
+		case "pod.tzzh.kafka/list-tags-for-resource":
 			svc := kafka.New(session.New())
 			input := &kafka.ListTagsForResourceInput{}
 			inputList := []kafka.ListTagsForResourceInput{}
@@ -4634,7 +4415,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4643,8 +4423,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/reboot-broker":
 
+		case "pod.tzzh.kafka/reboot-broker":
 			svc := kafka.New(session.New())
 			input := &kafka.RebootBrokerInput{}
 			inputList := []kafka.RebootBrokerInput{}
@@ -4652,7 +4432,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4661,8 +4440,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/tag-resource":
 
+		case "pod.tzzh.kafka/tag-resource":
 			svc := kafka.New(session.New())
 			input := &kafka.TagResourceInput{}
 			inputList := []kafka.TagResourceInput{}
@@ -4670,7 +4449,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4679,8 +4457,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/untag-resource":
 
+		case "pod.tzzh.kafka/untag-resource":
 			svc := kafka.New(session.New())
 			input := &kafka.UntagResourceInput{}
 			inputList := []kafka.UntagResourceInput{}
@@ -4688,7 +4466,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4697,8 +4474,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-broker-count":
 
+		case "pod.tzzh.kafka/update-broker-count":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateBrokerCountInput{}
 			inputList := []kafka.UpdateBrokerCountInput{}
@@ -4706,7 +4483,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4715,8 +4491,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-broker-storage":
 
+		case "pod.tzzh.kafka/update-broker-storage":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateBrokerStorageInput{}
 			inputList := []kafka.UpdateBrokerStorageInput{}
@@ -4724,7 +4500,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4733,8 +4508,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-cluster-configuration":
 
+		case "pod.tzzh.kafka/update-cluster-configuration":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateClusterConfigurationInput{}
 			inputList := []kafka.UpdateClusterConfigurationInput{}
@@ -4742,7 +4517,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4751,8 +4525,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-cluster-kafka-version":
 
+		case "pod.tzzh.kafka/update-cluster-kafka-version":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateClusterKafkaVersionInput{}
 			inputList := []kafka.UpdateClusterKafkaVersionInput{}
@@ -4760,7 +4534,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4769,8 +4542,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-configuration":
 
+		case "pod.tzzh.kafka/update-configuration":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateConfigurationInput{}
 			inputList := []kafka.UpdateConfigurationInput{}
@@ -4778,7 +4551,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4787,8 +4559,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kafka/update-monitoring":
 
+		case "pod.tzzh.kafka/update-monitoring":
 			svc := kafka.New(session.New())
 			input := &kafka.UpdateMonitoringInput{}
 			inputList := []kafka.UpdateMonitoringInput{}
@@ -4796,7 +4568,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4805,8 +4576,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/add-tags-to-stream":
 
+		case "pod.tzzh.kinesis/add-tags-to-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.AddTagsToStreamInput{}
 			inputList := []kinesis.AddTagsToStreamInput{}
@@ -4814,7 +4585,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4823,8 +4593,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/create-stream":
 
+		case "pod.tzzh.kinesis/create-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.CreateStreamInput{}
 			inputList := []kinesis.CreateStreamInput{}
@@ -4832,7 +4602,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4841,8 +4610,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/decrease-stream-retention-period":
 
+		case "pod.tzzh.kinesis/decrease-stream-retention-period":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DecreaseStreamRetentionPeriodInput{}
 			inputList := []kinesis.DecreaseStreamRetentionPeriodInput{}
@@ -4850,7 +4619,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4859,8 +4627,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/delete-stream":
 
+		case "pod.tzzh.kinesis/delete-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DeleteStreamInput{}
 			inputList := []kinesis.DeleteStreamInput{}
@@ -4868,7 +4636,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4877,8 +4644,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/deregister-stream-consumer":
 
+		case "pod.tzzh.kinesis/deregister-stream-consumer":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DeregisterStreamConsumerInput{}
 			inputList := []kinesis.DeregisterStreamConsumerInput{}
@@ -4886,7 +4653,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4895,8 +4661,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/describe-limits":
 
+		case "pod.tzzh.kinesis/describe-limits":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DescribeLimitsInput{}
 			inputList := []kinesis.DescribeLimitsInput{}
@@ -4904,7 +4670,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4913,8 +4678,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/describe-stream":
 
+		case "pod.tzzh.kinesis/describe-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DescribeStreamInput{}
 			inputList := []kinesis.DescribeStreamInput{}
@@ -4922,7 +4687,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4931,8 +4695,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/describe-stream-consumer":
 
+		case "pod.tzzh.kinesis/describe-stream-consumer":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DescribeStreamConsumerInput{}
 			inputList := []kinesis.DescribeStreamConsumerInput{}
@@ -4940,7 +4704,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4949,8 +4712,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/describe-stream-summary":
 
+		case "pod.tzzh.kinesis/describe-stream-summary":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DescribeStreamSummaryInput{}
 			inputList := []kinesis.DescribeStreamSummaryInput{}
@@ -4958,7 +4721,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4967,8 +4729,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/disable-enhanced-monitoring":
 
+		case "pod.tzzh.kinesis/disable-enhanced-monitoring":
 			svc := kinesis.New(session.New())
 			input := &kinesis.DisableEnhancedMonitoringInput{}
 			inputList := []kinesis.DisableEnhancedMonitoringInput{}
@@ -4976,7 +4738,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -4985,8 +4746,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/enable-enhanced-monitoring":
 
+		case "pod.tzzh.kinesis/enable-enhanced-monitoring":
 			svc := kinesis.New(session.New())
 			input := &kinesis.EnableEnhancedMonitoringInput{}
 			inputList := []kinesis.EnableEnhancedMonitoringInput{}
@@ -4994,7 +4755,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5003,8 +4763,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/get-records":
 
+		case "pod.tzzh.kinesis/get-records":
 			svc := kinesis.New(session.New())
 			input := &kinesis.GetRecordsInput{}
 			inputList := []kinesis.GetRecordsInput{}
@@ -5012,7 +4772,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5021,8 +4780,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/get-shard-iterator":
 
+		case "pod.tzzh.kinesis/get-shard-iterator":
 			svc := kinesis.New(session.New())
 			input := &kinesis.GetShardIteratorInput{}
 			inputList := []kinesis.GetShardIteratorInput{}
@@ -5030,7 +4789,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5039,8 +4797,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/increase-stream-retention-period":
 
+		case "pod.tzzh.kinesis/increase-stream-retention-period":
 			svc := kinesis.New(session.New())
 			input := &kinesis.IncreaseStreamRetentionPeriodInput{}
 			inputList := []kinesis.IncreaseStreamRetentionPeriodInput{}
@@ -5048,7 +4806,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5057,8 +4814,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/list-shards":
 
+		case "pod.tzzh.kinesis/list-shards":
 			svc := kinesis.New(session.New())
 			input := &kinesis.ListShardsInput{}
 			inputList := []kinesis.ListShardsInput{}
@@ -5066,7 +4823,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5075,8 +4831,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/list-stream-consumers":
 
+		case "pod.tzzh.kinesis/list-stream-consumers":
 			svc := kinesis.New(session.New())
 			input := &kinesis.ListStreamConsumersInput{}
 			inputList := []kinesis.ListStreamConsumersInput{}
@@ -5084,7 +4840,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5093,8 +4848,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/list-streams":
 
+		case "pod.tzzh.kinesis/list-streams":
 			svc := kinesis.New(session.New())
 			input := &kinesis.ListStreamsInput{}
 			inputList := []kinesis.ListStreamsInput{}
@@ -5102,7 +4857,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5111,8 +4865,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/list-tags-for-stream":
 
+		case "pod.tzzh.kinesis/list-tags-for-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.ListTagsForStreamInput{}
 			inputList := []kinesis.ListTagsForStreamInput{}
@@ -5120,7 +4874,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5129,8 +4882,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/merge-shards":
 
+		case "pod.tzzh.kinesis/merge-shards":
 			svc := kinesis.New(session.New())
 			input := &kinesis.MergeShardsInput{}
 			inputList := []kinesis.MergeShardsInput{}
@@ -5138,7 +4891,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5147,8 +4899,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/put-record":
 
+		case "pod.tzzh.kinesis/put-record":
 			svc := kinesis.New(session.New())
 			input := &kinesis.PutRecordInput{}
 			inputList := []kinesis.PutRecordInput{}
@@ -5156,7 +4908,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5165,8 +4916,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/put-records":
 
+		case "pod.tzzh.kinesis/put-records":
 			svc := kinesis.New(session.New())
 			input := &kinesis.PutRecordsInput{}
 			inputList := []kinesis.PutRecordsInput{}
@@ -5174,7 +4925,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5183,8 +4933,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/register-stream-consumer":
 
+		case "pod.tzzh.kinesis/register-stream-consumer":
 			svc := kinesis.New(session.New())
 			input := &kinesis.RegisterStreamConsumerInput{}
 			inputList := []kinesis.RegisterStreamConsumerInput{}
@@ -5192,7 +4942,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5201,8 +4950,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/remove-tags-from-stream":
 
+		case "pod.tzzh.kinesis/remove-tags-from-stream":
 			svc := kinesis.New(session.New())
 			input := &kinesis.RemoveTagsFromStreamInput{}
 			inputList := []kinesis.RemoveTagsFromStreamInput{}
@@ -5210,7 +4959,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5219,8 +4967,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/split-shard":
 
+		case "pod.tzzh.kinesis/split-shard":
 			svc := kinesis.New(session.New())
 			input := &kinesis.SplitShardInput{}
 			inputList := []kinesis.SplitShardInput{}
@@ -5228,7 +4976,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5237,8 +4984,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/start-stream-encryption":
 
+		case "pod.tzzh.kinesis/start-stream-encryption":
 			svc := kinesis.New(session.New())
 			input := &kinesis.StartStreamEncryptionInput{}
 			inputList := []kinesis.StartStreamEncryptionInput{}
@@ -5246,7 +4993,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5255,8 +5001,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/stop-stream-encryption":
 
+		case "pod.tzzh.kinesis/stop-stream-encryption":
 			svc := kinesis.New(session.New())
 			input := &kinesis.StopStreamEncryptionInput{}
 			inputList := []kinesis.StopStreamEncryptionInput{}
@@ -5264,7 +5010,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5273,8 +5018,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/subscribe-to-shard":
 
+		case "pod.tzzh.kinesis/subscribe-to-shard":
 			svc := kinesis.New(session.New())
 			input := &kinesis.SubscribeToShardInput{}
 			inputList := []kinesis.SubscribeToShardInput{}
@@ -5282,7 +5027,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5291,8 +5035,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.kinesis/update-shard-count":
 
+		case "pod.tzzh.kinesis/update-shard-count":
 			svc := kinesis.New(session.New())
 			input := &kinesis.UpdateShardCountInput{}
 			inputList := []kinesis.UpdateShardCountInput{}
@@ -5300,7 +5044,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5309,8 +5052,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/add-layer-version-permission":
 
+		case "pod.tzzh.lambda/add-layer-version-permission":
 			svc := lambda.New(session.New())
 			input := &lambda.AddLayerVersionPermissionInput{}
 			inputList := []lambda.AddLayerVersionPermissionInput{}
@@ -5318,7 +5061,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5327,8 +5069,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/add-permission":
 
+		case "pod.tzzh.lambda/add-permission":
 			svc := lambda.New(session.New())
 			input := &lambda.AddPermissionInput{}
 			inputList := []lambda.AddPermissionInput{}
@@ -5336,7 +5078,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5345,8 +5086,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/create-alias":
 
+		case "pod.tzzh.lambda/create-alias":
 			svc := lambda.New(session.New())
 			input := &lambda.CreateAliasInput{}
 			inputList := []lambda.CreateAliasInput{}
@@ -5354,7 +5095,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5363,8 +5103,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/create-event-source-mapping":
 
+		case "pod.tzzh.lambda/create-event-source-mapping":
 			svc := lambda.New(session.New())
 			input := &lambda.CreateEventSourceMappingInput{}
 			inputList := []lambda.CreateEventSourceMappingInput{}
@@ -5372,7 +5112,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5381,8 +5120,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/create-function":
 
+		case "pod.tzzh.lambda/create-function":
 			svc := lambda.New(session.New())
 			input := &lambda.CreateFunctionInput{}
 			inputList := []lambda.CreateFunctionInput{}
@@ -5390,7 +5129,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5399,8 +5137,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-alias":
 
+		case "pod.tzzh.lambda/delete-alias":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteAliasInput{}
 			inputList := []lambda.DeleteAliasInput{}
@@ -5408,7 +5146,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5417,8 +5154,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-event-source-mapping":
 
+		case "pod.tzzh.lambda/delete-event-source-mapping":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteEventSourceMappingInput{}
 			inputList := []lambda.DeleteEventSourceMappingInput{}
@@ -5426,7 +5163,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5435,8 +5171,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-function":
 
+		case "pod.tzzh.lambda/delete-function":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteFunctionInput{}
 			inputList := []lambda.DeleteFunctionInput{}
@@ -5444,7 +5180,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5453,8 +5188,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-function-concurrency":
 
+		case "pod.tzzh.lambda/delete-function-concurrency":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteFunctionConcurrencyInput{}
 			inputList := []lambda.DeleteFunctionConcurrencyInput{}
@@ -5462,7 +5197,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5471,8 +5205,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-function-event-invoke-config":
 
+		case "pod.tzzh.lambda/delete-function-event-invoke-config":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteFunctionEventInvokeConfigInput{}
 			inputList := []lambda.DeleteFunctionEventInvokeConfigInput{}
@@ -5480,7 +5214,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5489,8 +5222,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-layer-version":
 
+		case "pod.tzzh.lambda/delete-layer-version":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteLayerVersionInput{}
 			inputList := []lambda.DeleteLayerVersionInput{}
@@ -5498,7 +5231,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5507,8 +5239,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/delete-provisioned-concurrency-config":
 
+		case "pod.tzzh.lambda/delete-provisioned-concurrency-config":
 			svc := lambda.New(session.New())
 			input := &lambda.DeleteProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.DeleteProvisionedConcurrencyConfigInput{}
@@ -5516,7 +5248,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5525,8 +5256,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-account-settings":
 
+		case "pod.tzzh.lambda/get-account-settings":
 			svc := lambda.New(session.New())
 			input := &lambda.GetAccountSettingsInput{}
 			inputList := []lambda.GetAccountSettingsInput{}
@@ -5534,7 +5265,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5543,8 +5273,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-alias":
 
+		case "pod.tzzh.lambda/get-alias":
 			svc := lambda.New(session.New())
 			input := &lambda.GetAliasInput{}
 			inputList := []lambda.GetAliasInput{}
@@ -5552,7 +5282,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5561,8 +5290,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-event-source-mapping":
 
+		case "pod.tzzh.lambda/get-event-source-mapping":
 			svc := lambda.New(session.New())
 			input := &lambda.GetEventSourceMappingInput{}
 			inputList := []lambda.GetEventSourceMappingInput{}
@@ -5570,7 +5299,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5579,8 +5307,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-function":
 
+		case "pod.tzzh.lambda/get-function":
 			svc := lambda.New(session.New())
 			input := &lambda.GetFunctionInput{}
 			inputList := []lambda.GetFunctionInput{}
@@ -5588,7 +5316,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5597,8 +5324,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-function-concurrency":
 
+		case "pod.tzzh.lambda/get-function-concurrency":
 			svc := lambda.New(session.New())
 			input := &lambda.GetFunctionConcurrencyInput{}
 			inputList := []lambda.GetFunctionConcurrencyInput{}
@@ -5606,7 +5333,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5615,8 +5341,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-function-configuration":
 
+		case "pod.tzzh.lambda/get-function-configuration":
 			svc := lambda.New(session.New())
 			input := &lambda.GetFunctionConfigurationInput{}
 			inputList := []lambda.GetFunctionConfigurationInput{}
@@ -5624,7 +5350,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5633,8 +5358,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-function-event-invoke-config":
 
+		case "pod.tzzh.lambda/get-function-event-invoke-config":
 			svc := lambda.New(session.New())
 			input := &lambda.GetFunctionEventInvokeConfigInput{}
 			inputList := []lambda.GetFunctionEventInvokeConfigInput{}
@@ -5642,7 +5367,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5651,8 +5375,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-layer-version":
 
+		case "pod.tzzh.lambda/get-layer-version":
 			svc := lambda.New(session.New())
 			input := &lambda.GetLayerVersionInput{}
 			inputList := []lambda.GetLayerVersionInput{}
@@ -5660,7 +5384,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5669,8 +5392,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-layer-version-by-arn":
 
+		case "pod.tzzh.lambda/get-layer-version-by-arn":
 			svc := lambda.New(session.New())
 			input := &lambda.GetLayerVersionByArnInput{}
 			inputList := []lambda.GetLayerVersionByArnInput{}
@@ -5678,7 +5401,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5687,8 +5409,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-layer-version-policy":
 
+		case "pod.tzzh.lambda/get-layer-version-policy":
 			svc := lambda.New(session.New())
 			input := &lambda.GetLayerVersionPolicyInput{}
 			inputList := []lambda.GetLayerVersionPolicyInput{}
@@ -5696,7 +5418,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5705,8 +5426,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-policy":
 
+		case "pod.tzzh.lambda/get-policy":
 			svc := lambda.New(session.New())
 			input := &lambda.GetPolicyInput{}
 			inputList := []lambda.GetPolicyInput{}
@@ -5714,7 +5435,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5723,8 +5443,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/get-provisioned-concurrency-config":
 
+		case "pod.tzzh.lambda/get-provisioned-concurrency-config":
 			svc := lambda.New(session.New())
 			input := &lambda.GetProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.GetProvisionedConcurrencyConfigInput{}
@@ -5732,7 +5452,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5741,8 +5460,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/invoke":
 
+		case "pod.tzzh.lambda/invoke":
 			svc := lambda.New(session.New())
 			input := &lambda.InvokeInput{}
 			inputList := []lambda.InvokeInput{}
@@ -5750,7 +5469,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5759,8 +5477,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/invoke-async":
 
+		case "pod.tzzh.lambda/invoke-async":
 			svc := lambda.New(session.New())
 			input := &lambda.InvokeAsyncInput{}
 			inputList := []lambda.InvokeAsyncInput{}
@@ -5768,7 +5486,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5777,8 +5494,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-aliases":
 
+		case "pod.tzzh.lambda/list-aliases":
 			svc := lambda.New(session.New())
 			input := &lambda.ListAliasesInput{}
 			inputList := []lambda.ListAliasesInput{}
@@ -5786,7 +5503,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5795,8 +5511,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-event-source-mappings":
 
+		case "pod.tzzh.lambda/list-event-source-mappings":
 			svc := lambda.New(session.New())
 			input := &lambda.ListEventSourceMappingsInput{}
 			inputList := []lambda.ListEventSourceMappingsInput{}
@@ -5804,7 +5520,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5813,8 +5528,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-function-event-invoke-configs":
 
+		case "pod.tzzh.lambda/list-function-event-invoke-configs":
 			svc := lambda.New(session.New())
 			input := &lambda.ListFunctionEventInvokeConfigsInput{}
 			inputList := []lambda.ListFunctionEventInvokeConfigsInput{}
@@ -5822,7 +5537,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5831,8 +5545,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-functions":
 
+		case "pod.tzzh.lambda/list-functions":
 			svc := lambda.New(session.New())
 			input := &lambda.ListFunctionsInput{}
 			inputList := []lambda.ListFunctionsInput{}
@@ -5840,7 +5554,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5849,8 +5562,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-layer-versions":
 
+		case "pod.tzzh.lambda/list-layer-versions":
 			svc := lambda.New(session.New())
 			input := &lambda.ListLayerVersionsInput{}
 			inputList := []lambda.ListLayerVersionsInput{}
@@ -5858,7 +5571,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5867,8 +5579,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-layers":
 
+		case "pod.tzzh.lambda/list-layers":
 			svc := lambda.New(session.New())
 			input := &lambda.ListLayersInput{}
 			inputList := []lambda.ListLayersInput{}
@@ -5876,7 +5588,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5885,8 +5596,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-provisioned-concurrency-configs":
 
+		case "pod.tzzh.lambda/list-provisioned-concurrency-configs":
 			svc := lambda.New(session.New())
 			input := &lambda.ListProvisionedConcurrencyConfigsInput{}
 			inputList := []lambda.ListProvisionedConcurrencyConfigsInput{}
@@ -5894,7 +5605,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5903,8 +5613,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-tags":
 
+		case "pod.tzzh.lambda/list-tags":
 			svc := lambda.New(session.New())
 			input := &lambda.ListTagsInput{}
 			inputList := []lambda.ListTagsInput{}
@@ -5912,7 +5622,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5921,8 +5630,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/list-versions-by-function":
 
+		case "pod.tzzh.lambda/list-versions-by-function":
 			svc := lambda.New(session.New())
 			input := &lambda.ListVersionsByFunctionInput{}
 			inputList := []lambda.ListVersionsByFunctionInput{}
@@ -5930,7 +5639,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5939,8 +5647,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/publish-layer-version":
 
+		case "pod.tzzh.lambda/publish-layer-version":
 			svc := lambda.New(session.New())
 			input := &lambda.PublishLayerVersionInput{}
 			inputList := []lambda.PublishLayerVersionInput{}
@@ -5948,7 +5656,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5957,8 +5664,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/publish-version":
 
+		case "pod.tzzh.lambda/publish-version":
 			svc := lambda.New(session.New())
 			input := &lambda.PublishVersionInput{}
 			inputList := []lambda.PublishVersionInput{}
@@ -5966,7 +5673,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5975,8 +5681,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/put-function-concurrency":
 
+		case "pod.tzzh.lambda/put-function-concurrency":
 			svc := lambda.New(session.New())
 			input := &lambda.PutFunctionConcurrencyInput{}
 			inputList := []lambda.PutFunctionConcurrencyInput{}
@@ -5984,7 +5690,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -5993,8 +5698,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/put-function-event-invoke-config":
 
+		case "pod.tzzh.lambda/put-function-event-invoke-config":
 			svc := lambda.New(session.New())
 			input := &lambda.PutFunctionEventInvokeConfigInput{}
 			inputList := []lambda.PutFunctionEventInvokeConfigInput{}
@@ -6002,7 +5707,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6011,8 +5715,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/put-provisioned-concurrency-config":
 
+		case "pod.tzzh.lambda/put-provisioned-concurrency-config":
 			svc := lambda.New(session.New())
 			input := &lambda.PutProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.PutProvisionedConcurrencyConfigInput{}
@@ -6020,7 +5724,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6029,8 +5732,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/remove-layer-version-permission":
 
+		case "pod.tzzh.lambda/remove-layer-version-permission":
 			svc := lambda.New(session.New())
 			input := &lambda.RemoveLayerVersionPermissionInput{}
 			inputList := []lambda.RemoveLayerVersionPermissionInput{}
@@ -6038,7 +5741,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6047,8 +5749,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/remove-permission":
 
+		case "pod.tzzh.lambda/remove-permission":
 			svc := lambda.New(session.New())
 			input := &lambda.RemovePermissionInput{}
 			inputList := []lambda.RemovePermissionInput{}
@@ -6056,7 +5758,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6065,8 +5766,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/tag-resource":
 
+		case "pod.tzzh.lambda/tag-resource":
 			svc := lambda.New(session.New())
 			input := &lambda.TagResourceInput{}
 			inputList := []lambda.TagResourceInput{}
@@ -6074,7 +5775,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6083,8 +5783,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/untag-resource":
 
+		case "pod.tzzh.lambda/untag-resource":
 			svc := lambda.New(session.New())
 			input := &lambda.UntagResourceInput{}
 			inputList := []lambda.UntagResourceInput{}
@@ -6092,7 +5792,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6101,8 +5800,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/update-alias":
 
+		case "pod.tzzh.lambda/update-alias":
 			svc := lambda.New(session.New())
 			input := &lambda.UpdateAliasInput{}
 			inputList := []lambda.UpdateAliasInput{}
@@ -6110,7 +5809,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6119,8 +5817,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/update-event-source-mapping":
 
+		case "pod.tzzh.lambda/update-event-source-mapping":
 			svc := lambda.New(session.New())
 			input := &lambda.UpdateEventSourceMappingInput{}
 			inputList := []lambda.UpdateEventSourceMappingInput{}
@@ -6128,7 +5826,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6137,8 +5834,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/update-function-code":
 
+		case "pod.tzzh.lambda/update-function-code":
 			svc := lambda.New(session.New())
 			input := &lambda.UpdateFunctionCodeInput{}
 			inputList := []lambda.UpdateFunctionCodeInput{}
@@ -6146,7 +5843,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6155,8 +5851,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/update-function-configuration":
 
+		case "pod.tzzh.lambda/update-function-configuration":
 			svc := lambda.New(session.New())
 			input := &lambda.UpdateFunctionConfigurationInput{}
 			inputList := []lambda.UpdateFunctionConfigurationInput{}
@@ -6164,7 +5860,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6173,8 +5868,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.lambda/update-function-event-invoke-config":
 
+		case "pod.tzzh.lambda/update-function-event-invoke-config":
 			svc := lambda.New(session.New())
 			input := &lambda.UpdateFunctionEventInvokeConfigInput{}
 			inputList := []lambda.UpdateFunctionEventInvokeConfigInput{}
@@ -6182,7 +5877,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6191,8 +5885,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/abort-multipart-upload":
 
+		case "pod.tzzh.s3/abort-multipart-upload":
 			svc := s3.New(session.New())
 			input := &s3.AbortMultipartUploadInput{}
 			inputList := []s3.AbortMultipartUploadInput{}
@@ -6200,7 +5894,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6209,8 +5902,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/complete-multipart-upload":
 
+		case "pod.tzzh.s3/complete-multipart-upload":
 			svc := s3.New(session.New())
 			input := &s3.CompleteMultipartUploadInput{}
 			inputList := []s3.CompleteMultipartUploadInput{}
@@ -6218,7 +5911,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6227,8 +5919,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/copy-object":
 
+		case "pod.tzzh.s3/copy-object":
 			svc := s3.New(session.New())
 			input := &s3.CopyObjectInput{}
 			inputList := []s3.CopyObjectInput{}
@@ -6236,7 +5928,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6245,8 +5936,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/create-bucket":
 
+		case "pod.tzzh.s3/create-bucket":
 			svc := s3.New(session.New())
 			input := &s3.CreateBucketInput{}
 			inputList := []s3.CreateBucketInput{}
@@ -6254,7 +5945,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6263,8 +5953,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/create-multipart-upload":
 
+		case "pod.tzzh.s3/create-multipart-upload":
 			svc := s3.New(session.New())
 			input := &s3.CreateMultipartUploadInput{}
 			inputList := []s3.CreateMultipartUploadInput{}
@@ -6272,7 +5962,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6281,8 +5970,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket":
 
+		case "pod.tzzh.s3/delete-bucket":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketInput{}
 			inputList := []s3.DeleteBucketInput{}
@@ -6290,7 +5979,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6299,8 +5987,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-analytics-configuration":
 
+		case "pod.tzzh.s3/delete-bucket-analytics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketAnalyticsConfigurationInput{}
 			inputList := []s3.DeleteBucketAnalyticsConfigurationInput{}
@@ -6308,7 +5996,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6317,8 +6004,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-cors":
 
+		case "pod.tzzh.s3/delete-bucket-cors":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketCorsInput{}
 			inputList := []s3.DeleteBucketCorsInput{}
@@ -6326,7 +6013,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6335,8 +6021,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-encryption":
 
+		case "pod.tzzh.s3/delete-bucket-encryption":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketEncryptionInput{}
 			inputList := []s3.DeleteBucketEncryptionInput{}
@@ -6344,7 +6030,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6353,8 +6038,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-inventory-configuration":
 
+		case "pod.tzzh.s3/delete-bucket-inventory-configuration":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketInventoryConfigurationInput{}
 			inputList := []s3.DeleteBucketInventoryConfigurationInput{}
@@ -6362,7 +6047,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6371,8 +6055,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-lifecycle":
 
+		case "pod.tzzh.s3/delete-bucket-lifecycle":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketLifecycleInput{}
 			inputList := []s3.DeleteBucketLifecycleInput{}
@@ -6380,7 +6064,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6389,8 +6072,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-metrics-configuration":
 
+		case "pod.tzzh.s3/delete-bucket-metrics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketMetricsConfigurationInput{}
 			inputList := []s3.DeleteBucketMetricsConfigurationInput{}
@@ -6398,7 +6081,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6407,8 +6089,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-policy":
 
+		case "pod.tzzh.s3/delete-bucket-policy":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketPolicyInput{}
 			inputList := []s3.DeleteBucketPolicyInput{}
@@ -6416,7 +6098,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6425,8 +6106,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-replication":
 
+		case "pod.tzzh.s3/delete-bucket-replication":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketReplicationInput{}
 			inputList := []s3.DeleteBucketReplicationInput{}
@@ -6434,7 +6115,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6443,8 +6123,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-tagging":
 
+		case "pod.tzzh.s3/delete-bucket-tagging":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketTaggingInput{}
 			inputList := []s3.DeleteBucketTaggingInput{}
@@ -6452,7 +6132,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6461,8 +6140,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-bucket-website":
 
+		case "pod.tzzh.s3/delete-bucket-website":
 			svc := s3.New(session.New())
 			input := &s3.DeleteBucketWebsiteInput{}
 			inputList := []s3.DeleteBucketWebsiteInput{}
@@ -6470,7 +6149,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6479,8 +6157,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-object":
 
+		case "pod.tzzh.s3/delete-object":
 			svc := s3.New(session.New())
 			input := &s3.DeleteObjectInput{}
 			inputList := []s3.DeleteObjectInput{}
@@ -6488,7 +6166,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6497,8 +6174,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-object-tagging":
 
+		case "pod.tzzh.s3/delete-object-tagging":
 			svc := s3.New(session.New())
 			input := &s3.DeleteObjectTaggingInput{}
 			inputList := []s3.DeleteObjectTaggingInput{}
@@ -6506,7 +6183,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6515,8 +6191,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-objects":
 
+		case "pod.tzzh.s3/delete-objects":
 			svc := s3.New(session.New())
 			input := &s3.DeleteObjectsInput{}
 			inputList := []s3.DeleteObjectsInput{}
@@ -6524,7 +6200,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6533,8 +6208,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/delete-public-access-block":
 
+		case "pod.tzzh.s3/delete-public-access-block":
 			svc := s3.New(session.New())
 			input := &s3.DeletePublicAccessBlockInput{}
 			inputList := []s3.DeletePublicAccessBlockInput{}
@@ -6542,7 +6217,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6551,8 +6225,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-accelerate-configuration":
 
+		case "pod.tzzh.s3/get-bucket-accelerate-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketAccelerateConfigurationInput{}
 			inputList := []s3.GetBucketAccelerateConfigurationInput{}
@@ -6560,7 +6234,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6569,8 +6242,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-acl":
 
+		case "pod.tzzh.s3/get-bucket-acl":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketAclInput{}
 			inputList := []s3.GetBucketAclInput{}
@@ -6578,7 +6251,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6587,8 +6259,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-analytics-configuration":
 
+		case "pod.tzzh.s3/get-bucket-analytics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketAnalyticsConfigurationInput{}
 			inputList := []s3.GetBucketAnalyticsConfigurationInput{}
@@ -6596,7 +6268,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6605,8 +6276,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-cors":
 
+		case "pod.tzzh.s3/get-bucket-cors":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketCorsInput{}
 			inputList := []s3.GetBucketCorsInput{}
@@ -6614,7 +6285,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6623,8 +6293,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-encryption":
 
+		case "pod.tzzh.s3/get-bucket-encryption":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketEncryptionInput{}
 			inputList := []s3.GetBucketEncryptionInput{}
@@ -6632,7 +6302,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6641,8 +6310,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-inventory-configuration":
 
+		case "pod.tzzh.s3/get-bucket-inventory-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketInventoryConfigurationInput{}
 			inputList := []s3.GetBucketInventoryConfigurationInput{}
@@ -6650,7 +6319,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6659,8 +6327,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-lifecycle":
 
+		case "pod.tzzh.s3/get-bucket-lifecycle":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketLifecycleInput{}
 			inputList := []s3.GetBucketLifecycleInput{}
@@ -6668,7 +6336,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6677,8 +6344,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-lifecycle-configuration":
 
+		case "pod.tzzh.s3/get-bucket-lifecycle-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketLifecycleConfigurationInput{}
 			inputList := []s3.GetBucketLifecycleConfigurationInput{}
@@ -6686,7 +6353,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6695,8 +6361,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-location":
 
+		case "pod.tzzh.s3/get-bucket-location":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketLocationInput{}
 			inputList := []s3.GetBucketLocationInput{}
@@ -6704,7 +6370,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6713,8 +6378,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-logging":
 
+		case "pod.tzzh.s3/get-bucket-logging":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketLoggingInput{}
 			inputList := []s3.GetBucketLoggingInput{}
@@ -6722,7 +6387,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6731,8 +6395,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-metrics-configuration":
 
+		case "pod.tzzh.s3/get-bucket-metrics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketMetricsConfigurationInput{}
 			inputList := []s3.GetBucketMetricsConfigurationInput{}
@@ -6740,7 +6404,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6749,8 +6412,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-policy":
 
+		case "pod.tzzh.s3/get-bucket-policy":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketPolicyInput{}
 			inputList := []s3.GetBucketPolicyInput{}
@@ -6758,7 +6421,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6767,8 +6429,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-policy-status":
 
+		case "pod.tzzh.s3/get-bucket-policy-status":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketPolicyStatusInput{}
 			inputList := []s3.GetBucketPolicyStatusInput{}
@@ -6776,7 +6438,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6785,8 +6446,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-replication":
 
+		case "pod.tzzh.s3/get-bucket-replication":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketReplicationInput{}
 			inputList := []s3.GetBucketReplicationInput{}
@@ -6794,7 +6455,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6803,8 +6463,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-request-payment":
 
+		case "pod.tzzh.s3/get-bucket-request-payment":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketRequestPaymentInput{}
 			inputList := []s3.GetBucketRequestPaymentInput{}
@@ -6812,7 +6472,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6821,8 +6480,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-tagging":
 
+		case "pod.tzzh.s3/get-bucket-tagging":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketTaggingInput{}
 			inputList := []s3.GetBucketTaggingInput{}
@@ -6830,7 +6489,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6839,8 +6497,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-versioning":
 
+		case "pod.tzzh.s3/get-bucket-versioning":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketVersioningInput{}
 			inputList := []s3.GetBucketVersioningInput{}
@@ -6848,7 +6506,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6857,8 +6514,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-bucket-website":
 
+		case "pod.tzzh.s3/get-bucket-website":
 			svc := s3.New(session.New())
 			input := &s3.GetBucketWebsiteInput{}
 			inputList := []s3.GetBucketWebsiteInput{}
@@ -6866,7 +6523,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6875,8 +6531,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object":
 
+		case "pod.tzzh.s3/get-object":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectInput{}
 			inputList := []s3.GetObjectInput{}
@@ -6884,7 +6540,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6893,8 +6548,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-acl":
 
+		case "pod.tzzh.s3/get-object-acl":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectAclInput{}
 			inputList := []s3.GetObjectAclInput{}
@@ -6902,7 +6557,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6911,8 +6565,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-legal-hold":
 
+		case "pod.tzzh.s3/get-object-legal-hold":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectLegalHoldInput{}
 			inputList := []s3.GetObjectLegalHoldInput{}
@@ -6920,7 +6574,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6929,8 +6582,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-lock-configuration":
 
+		case "pod.tzzh.s3/get-object-lock-configuration":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectLockConfigurationInput{}
 			inputList := []s3.GetObjectLockConfigurationInput{}
@@ -6938,7 +6591,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6947,8 +6599,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-retention":
 
+		case "pod.tzzh.s3/get-object-retention":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectRetentionInput{}
 			inputList := []s3.GetObjectRetentionInput{}
@@ -6956,7 +6608,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6965,8 +6616,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-tagging":
 
+		case "pod.tzzh.s3/get-object-tagging":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectTaggingInput{}
 			inputList := []s3.GetObjectTaggingInput{}
@@ -6974,7 +6625,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -6983,8 +6633,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-object-torrent":
 
+		case "pod.tzzh.s3/get-object-torrent":
 			svc := s3.New(session.New())
 			input := &s3.GetObjectTorrentInput{}
 			inputList := []s3.GetObjectTorrentInput{}
@@ -6992,7 +6642,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7001,8 +6650,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/get-public-access-block":
 
+		case "pod.tzzh.s3/get-public-access-block":
 			svc := s3.New(session.New())
 			input := &s3.GetPublicAccessBlockInput{}
 			inputList := []s3.GetPublicAccessBlockInput{}
@@ -7010,7 +6659,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7019,8 +6667,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/head-bucket":
 
+		case "pod.tzzh.s3/head-bucket":
 			svc := s3.New(session.New())
 			input := &s3.HeadBucketInput{}
 			inputList := []s3.HeadBucketInput{}
@@ -7028,7 +6676,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7037,8 +6684,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/head-object":
 
+		case "pod.tzzh.s3/head-object":
 			svc := s3.New(session.New())
 			input := &s3.HeadObjectInput{}
 			inputList := []s3.HeadObjectInput{}
@@ -7046,7 +6693,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7055,8 +6701,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-bucket-analytics-configurations":
 
+		case "pod.tzzh.s3/list-bucket-analytics-configurations":
 			svc := s3.New(session.New())
 			input := &s3.ListBucketAnalyticsConfigurationsInput{}
 			inputList := []s3.ListBucketAnalyticsConfigurationsInput{}
@@ -7064,7 +6710,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7073,8 +6718,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-bucket-inventory-configurations":
 
+		case "pod.tzzh.s3/list-bucket-inventory-configurations":
 			svc := s3.New(session.New())
 			input := &s3.ListBucketInventoryConfigurationsInput{}
 			inputList := []s3.ListBucketInventoryConfigurationsInput{}
@@ -7082,7 +6727,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7091,8 +6735,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-bucket-metrics-configurations":
 
+		case "pod.tzzh.s3/list-bucket-metrics-configurations":
 			svc := s3.New(session.New())
 			input := &s3.ListBucketMetricsConfigurationsInput{}
 			inputList := []s3.ListBucketMetricsConfigurationsInput{}
@@ -7100,7 +6744,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7109,8 +6752,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-buckets":
 
+		case "pod.tzzh.s3/list-buckets":
 			svc := s3.New(session.New())
 			input := &s3.ListBucketsInput{}
 			inputList := []s3.ListBucketsInput{}
@@ -7118,7 +6761,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7127,8 +6769,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-multipart-uploads":
 
+		case "pod.tzzh.s3/list-multipart-uploads":
 			svc := s3.New(session.New())
 			input := &s3.ListMultipartUploadsInput{}
 			inputList := []s3.ListMultipartUploadsInput{}
@@ -7136,7 +6778,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7145,8 +6786,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-object-versions":
 
+		case "pod.tzzh.s3/list-object-versions":
 			svc := s3.New(session.New())
 			input := &s3.ListObjectVersionsInput{}
 			inputList := []s3.ListObjectVersionsInput{}
@@ -7154,7 +6795,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7163,8 +6803,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-objects":
 
+		case "pod.tzzh.s3/list-objects":
 			svc := s3.New(session.New())
 			input := &s3.ListObjectsInput{}
 			inputList := []s3.ListObjectsInput{}
@@ -7172,7 +6812,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7181,8 +6820,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-objects-v2":
 
+		case "pod.tzzh.s3/list-objects-v2":
 			svc := s3.New(session.New())
 			input := &s3.ListObjectsV2Input{}
 			inputList := []s3.ListObjectsV2Input{}
@@ -7190,7 +6829,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7199,8 +6837,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/list-parts":
 
+		case "pod.tzzh.s3/list-parts":
 			svc := s3.New(session.New())
 			input := &s3.ListPartsInput{}
 			inputList := []s3.ListPartsInput{}
@@ -7208,7 +6846,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7217,8 +6854,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-accelerate-configuration":
 
+		case "pod.tzzh.s3/put-bucket-accelerate-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketAccelerateConfigurationInput{}
 			inputList := []s3.PutBucketAccelerateConfigurationInput{}
@@ -7226,7 +6863,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7235,8 +6871,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-acl":
 
+		case "pod.tzzh.s3/put-bucket-acl":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketAclInput{}
 			inputList := []s3.PutBucketAclInput{}
@@ -7244,7 +6880,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7253,8 +6888,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-analytics-configuration":
 
+		case "pod.tzzh.s3/put-bucket-analytics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketAnalyticsConfigurationInput{}
 			inputList := []s3.PutBucketAnalyticsConfigurationInput{}
@@ -7262,7 +6897,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7271,8 +6905,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-cors":
 
+		case "pod.tzzh.s3/put-bucket-cors":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketCorsInput{}
 			inputList := []s3.PutBucketCorsInput{}
@@ -7280,7 +6914,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7289,8 +6922,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-encryption":
 
+		case "pod.tzzh.s3/put-bucket-encryption":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketEncryptionInput{}
 			inputList := []s3.PutBucketEncryptionInput{}
@@ -7298,7 +6931,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7307,8 +6939,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-inventory-configuration":
 
+		case "pod.tzzh.s3/put-bucket-inventory-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketInventoryConfigurationInput{}
 			inputList := []s3.PutBucketInventoryConfigurationInput{}
@@ -7316,7 +6948,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7325,8 +6956,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-lifecycle":
 
+		case "pod.tzzh.s3/put-bucket-lifecycle":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketLifecycleInput{}
 			inputList := []s3.PutBucketLifecycleInput{}
@@ -7334,7 +6965,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7343,8 +6973,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-lifecycle-configuration":
 
+		case "pod.tzzh.s3/put-bucket-lifecycle-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketLifecycleConfigurationInput{}
 			inputList := []s3.PutBucketLifecycleConfigurationInput{}
@@ -7352,7 +6982,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7361,8 +6990,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-logging":
 
+		case "pod.tzzh.s3/put-bucket-logging":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketLoggingInput{}
 			inputList := []s3.PutBucketLoggingInput{}
@@ -7370,7 +6999,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7379,8 +7007,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-metrics-configuration":
 
+		case "pod.tzzh.s3/put-bucket-metrics-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketMetricsConfigurationInput{}
 			inputList := []s3.PutBucketMetricsConfigurationInput{}
@@ -7388,7 +7016,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7397,8 +7024,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-notification":
 
+		case "pod.tzzh.s3/put-bucket-notification":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketNotificationInput{}
 			inputList := []s3.PutBucketNotificationInput{}
@@ -7406,7 +7033,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7415,8 +7041,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-notification-configuration":
 
+		case "pod.tzzh.s3/put-bucket-notification-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketNotificationConfigurationInput{}
 			inputList := []s3.PutBucketNotificationConfigurationInput{}
@@ -7424,7 +7050,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7433,8 +7058,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-policy":
 
+		case "pod.tzzh.s3/put-bucket-policy":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketPolicyInput{}
 			inputList := []s3.PutBucketPolicyInput{}
@@ -7442,7 +7067,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7451,8 +7075,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-replication":
 
+		case "pod.tzzh.s3/put-bucket-replication":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketReplicationInput{}
 			inputList := []s3.PutBucketReplicationInput{}
@@ -7460,7 +7084,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7469,8 +7092,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-request-payment":
 
+		case "pod.tzzh.s3/put-bucket-request-payment":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketRequestPaymentInput{}
 			inputList := []s3.PutBucketRequestPaymentInput{}
@@ -7478,7 +7101,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7487,8 +7109,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-tagging":
 
+		case "pod.tzzh.s3/put-bucket-tagging":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketTaggingInput{}
 			inputList := []s3.PutBucketTaggingInput{}
@@ -7496,7 +7118,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7505,8 +7126,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-versioning":
 
+		case "pod.tzzh.s3/put-bucket-versioning":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketVersioningInput{}
 			inputList := []s3.PutBucketVersioningInput{}
@@ -7514,7 +7135,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7523,8 +7143,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-bucket-website":
 
+		case "pod.tzzh.s3/put-bucket-website":
 			svc := s3.New(session.New())
 			input := &s3.PutBucketWebsiteInput{}
 			inputList := []s3.PutBucketWebsiteInput{}
@@ -7532,7 +7152,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7541,8 +7160,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object":
 
+		case "pod.tzzh.s3/put-object":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectInput{}
 			inputList := []s3.PutObjectInput{}
@@ -7550,7 +7169,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7559,8 +7177,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object-acl":
 
+		case "pod.tzzh.s3/put-object-acl":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectAclInput{}
 			inputList := []s3.PutObjectAclInput{}
@@ -7568,7 +7186,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7577,8 +7194,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object-legal-hold":
 
+		case "pod.tzzh.s3/put-object-legal-hold":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectLegalHoldInput{}
 			inputList := []s3.PutObjectLegalHoldInput{}
@@ -7586,7 +7203,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7595,8 +7211,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object-lock-configuration":
 
+		case "pod.tzzh.s3/put-object-lock-configuration":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectLockConfigurationInput{}
 			inputList := []s3.PutObjectLockConfigurationInput{}
@@ -7604,7 +7220,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7613,8 +7228,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object-retention":
 
+		case "pod.tzzh.s3/put-object-retention":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectRetentionInput{}
 			inputList := []s3.PutObjectRetentionInput{}
@@ -7622,7 +7237,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7631,8 +7245,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-object-tagging":
 
+		case "pod.tzzh.s3/put-object-tagging":
 			svc := s3.New(session.New())
 			input := &s3.PutObjectTaggingInput{}
 			inputList := []s3.PutObjectTaggingInput{}
@@ -7640,7 +7254,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7649,8 +7262,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/put-public-access-block":
 
+		case "pod.tzzh.s3/put-public-access-block":
 			svc := s3.New(session.New())
 			input := &s3.PutPublicAccessBlockInput{}
 			inputList := []s3.PutPublicAccessBlockInput{}
@@ -7658,7 +7271,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7667,8 +7279,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/restore-object":
 
+		case "pod.tzzh.s3/restore-object":
 			svc := s3.New(session.New())
 			input := &s3.RestoreObjectInput{}
 			inputList := []s3.RestoreObjectInput{}
@@ -7676,7 +7288,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7685,8 +7296,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/select-object-content":
 
+		case "pod.tzzh.s3/select-object-content":
 			svc := s3.New(session.New())
 			input := &s3.SelectObjectContentInput{}
 			inputList := []s3.SelectObjectContentInput{}
@@ -7694,7 +7305,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7703,8 +7313,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/upload-part":
 
+		case "pod.tzzh.s3/upload-part":
 			svc := s3.New(session.New())
 			input := &s3.UploadPartInput{}
 			inputList := []s3.UploadPartInput{}
@@ -7712,7 +7322,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7721,8 +7330,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.s3/upload-part-copy":
 
+		case "pod.tzzh.s3/upload-part-copy":
 			svc := s3.New(session.New())
 			input := &s3.UploadPartCopyInput{}
 			inputList := []s3.UploadPartCopyInput{}
@@ -7730,7 +7339,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7739,8 +7347,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/add-permission":
 
+		case "pod.tzzh.sqs/add-permission":
 			svc := sqs.New(session.New())
 			input := &sqs.AddPermissionInput{}
 			inputList := []sqs.AddPermissionInput{}
@@ -7748,7 +7356,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7757,8 +7364,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/change-message-visibility":
 
+		case "pod.tzzh.sqs/change-message-visibility":
 			svc := sqs.New(session.New())
 			input := &sqs.ChangeMessageVisibilityInput{}
 			inputList := []sqs.ChangeMessageVisibilityInput{}
@@ -7766,7 +7373,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7775,8 +7381,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/change-message-visibility-batch":
 
+		case "pod.tzzh.sqs/change-message-visibility-batch":
 			svc := sqs.New(session.New())
 			input := &sqs.ChangeMessageVisibilityBatchInput{}
 			inputList := []sqs.ChangeMessageVisibilityBatchInput{}
@@ -7784,7 +7390,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7793,8 +7398,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/create-queue":
 
+		case "pod.tzzh.sqs/create-queue":
 			svc := sqs.New(session.New())
 			input := &sqs.CreateQueueInput{}
 			inputList := []sqs.CreateQueueInput{}
@@ -7802,7 +7407,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7811,8 +7415,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/delete-message":
 
+		case "pod.tzzh.sqs/delete-message":
 			svc := sqs.New(session.New())
 			input := &sqs.DeleteMessageInput{}
 			inputList := []sqs.DeleteMessageInput{}
@@ -7820,7 +7424,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7829,8 +7432,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/delete-message-batch":
 
+		case "pod.tzzh.sqs/delete-message-batch":
 			svc := sqs.New(session.New())
 			input := &sqs.DeleteMessageBatchInput{}
 			inputList := []sqs.DeleteMessageBatchInput{}
@@ -7838,7 +7441,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7847,8 +7449,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/delete-queue":
 
+		case "pod.tzzh.sqs/delete-queue":
 			svc := sqs.New(session.New())
 			input := &sqs.DeleteQueueInput{}
 			inputList := []sqs.DeleteQueueInput{}
@@ -7856,7 +7458,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7865,8 +7466,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/get-queue-attributes":
 
+		case "pod.tzzh.sqs/get-queue-attributes":
 			svc := sqs.New(session.New())
 			input := &sqs.GetQueueAttributesInput{}
 			inputList := []sqs.GetQueueAttributesInput{}
@@ -7874,7 +7475,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7883,8 +7483,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/get-queue-url":
 
+		case "pod.tzzh.sqs/get-queue-url":
 			svc := sqs.New(session.New())
 			input := &sqs.GetQueueUrlInput{}
 			inputList := []sqs.GetQueueUrlInput{}
@@ -7892,7 +7492,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7901,8 +7500,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/list-dead-letter-source-queues":
 
+		case "pod.tzzh.sqs/list-dead-letter-source-queues":
 			svc := sqs.New(session.New())
 			input := &sqs.ListDeadLetterSourceQueuesInput{}
 			inputList := []sqs.ListDeadLetterSourceQueuesInput{}
@@ -7910,7 +7509,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7919,8 +7517,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/list-queue-tags":
 
+		case "pod.tzzh.sqs/list-queue-tags":
 			svc := sqs.New(session.New())
 			input := &sqs.ListQueueTagsInput{}
 			inputList := []sqs.ListQueueTagsInput{}
@@ -7928,7 +7526,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7937,8 +7534,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/list-queues":
 
+		case "pod.tzzh.sqs/list-queues":
 			svc := sqs.New(session.New())
 			input := &sqs.ListQueuesInput{}
 			inputList := []sqs.ListQueuesInput{}
@@ -7946,7 +7543,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7955,8 +7551,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/purge-queue":
 
+		case "pod.tzzh.sqs/purge-queue":
 			svc := sqs.New(session.New())
 			input := &sqs.PurgeQueueInput{}
 			inputList := []sqs.PurgeQueueInput{}
@@ -7964,7 +7560,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7973,8 +7568,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/receive-message":
 
+		case "pod.tzzh.sqs/receive-message":
 			svc := sqs.New(session.New())
 			input := &sqs.ReceiveMessageInput{}
 			inputList := []sqs.ReceiveMessageInput{}
@@ -7982,7 +7577,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -7991,8 +7585,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/remove-permission":
 
+		case "pod.tzzh.sqs/remove-permission":
 			svc := sqs.New(session.New())
 			input := &sqs.RemovePermissionInput{}
 			inputList := []sqs.RemovePermissionInput{}
@@ -8000,7 +7594,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8009,8 +7602,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/send-message":
 
+		case "pod.tzzh.sqs/send-message":
 			svc := sqs.New(session.New())
 			input := &sqs.SendMessageInput{}
 			inputList := []sqs.SendMessageInput{}
@@ -8018,7 +7611,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8027,8 +7619,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/send-message-batch":
 
+		case "pod.tzzh.sqs/send-message-batch":
 			svc := sqs.New(session.New())
 			input := &sqs.SendMessageBatchInput{}
 			inputList := []sqs.SendMessageBatchInput{}
@@ -8036,7 +7628,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8045,8 +7636,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/set-queue-attributes":
 
+		case "pod.tzzh.sqs/set-queue-attributes":
 			svc := sqs.New(session.New())
 			input := &sqs.SetQueueAttributesInput{}
 			inputList := []sqs.SetQueueAttributesInput{}
@@ -8054,7 +7645,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8063,8 +7653,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/tag-queue":
 
+		case "pod.tzzh.sqs/tag-queue":
 			svc := sqs.New(session.New())
 			input := &sqs.TagQueueInput{}
 			inputList := []sqs.TagQueueInput{}
@@ -8072,7 +7662,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8081,8 +7670,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.sqs/untag-queue":
 
+		case "pod.tzzh.sqs/untag-queue":
 			svc := sqs.New(session.New())
 			input := &sqs.UntagQueueInput{}
 			inputList := []sqs.UntagQueueInput{}
@@ -8090,7 +7679,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8099,8 +7687,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/add-tags-to-resource":
 
+		case "pod.tzzh.ssm/add-tags-to-resource":
 			svc := ssm.New(session.New())
 			input := &ssm.AddTagsToResourceInput{}
 			inputList := []ssm.AddTagsToResourceInput{}
@@ -8108,7 +7696,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8117,8 +7704,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/cancel-command":
 
+		case "pod.tzzh.ssm/cancel-command":
 			svc := ssm.New(session.New())
 			input := &ssm.CancelCommandInput{}
 			inputList := []ssm.CancelCommandInput{}
@@ -8126,7 +7713,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8135,8 +7721,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/cancel-maintenance-window-execution":
 
+		case "pod.tzzh.ssm/cancel-maintenance-window-execution":
 			svc := ssm.New(session.New())
 			input := &ssm.CancelMaintenanceWindowExecutionInput{}
 			inputList := []ssm.CancelMaintenanceWindowExecutionInput{}
@@ -8144,7 +7730,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8153,8 +7738,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-activation":
 
+		case "pod.tzzh.ssm/create-activation":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateActivationInput{}
 			inputList := []ssm.CreateActivationInput{}
@@ -8162,7 +7747,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8171,8 +7755,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-association":
 
+		case "pod.tzzh.ssm/create-association":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateAssociationInput{}
 			inputList := []ssm.CreateAssociationInput{}
@@ -8180,7 +7764,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8189,8 +7772,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-association-batch":
 
+		case "pod.tzzh.ssm/create-association-batch":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateAssociationBatchInput{}
 			inputList := []ssm.CreateAssociationBatchInput{}
@@ -8198,7 +7781,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8207,8 +7789,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-document":
 
+		case "pod.tzzh.ssm/create-document":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateDocumentInput{}
 			inputList := []ssm.CreateDocumentInput{}
@@ -8216,7 +7798,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8225,8 +7806,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-maintenance-window":
 
+		case "pod.tzzh.ssm/create-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateMaintenanceWindowInput{}
 			inputList := []ssm.CreateMaintenanceWindowInput{}
@@ -8234,7 +7815,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8243,8 +7823,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-ops-item":
 
+		case "pod.tzzh.ssm/create-ops-item":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateOpsItemInput{}
 			inputList := []ssm.CreateOpsItemInput{}
@@ -8252,7 +7832,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8261,8 +7840,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-patch-baseline":
 
+		case "pod.tzzh.ssm/create-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.CreatePatchBaselineInput{}
 			inputList := []ssm.CreatePatchBaselineInput{}
@@ -8270,7 +7849,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8279,8 +7857,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/create-resource-data-sync":
 
+		case "pod.tzzh.ssm/create-resource-data-sync":
 			svc := ssm.New(session.New())
 			input := &ssm.CreateResourceDataSyncInput{}
 			inputList := []ssm.CreateResourceDataSyncInput{}
@@ -8288,7 +7866,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8297,8 +7874,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-activation":
 
+		case "pod.tzzh.ssm/delete-activation":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteActivationInput{}
 			inputList := []ssm.DeleteActivationInput{}
@@ -8306,7 +7883,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8315,8 +7891,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-association":
 
+		case "pod.tzzh.ssm/delete-association":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteAssociationInput{}
 			inputList := []ssm.DeleteAssociationInput{}
@@ -8324,7 +7900,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8333,8 +7908,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-document":
 
+		case "pod.tzzh.ssm/delete-document":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteDocumentInput{}
 			inputList := []ssm.DeleteDocumentInput{}
@@ -8342,7 +7917,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8351,8 +7925,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-inventory":
 
+		case "pod.tzzh.ssm/delete-inventory":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteInventoryInput{}
 			inputList := []ssm.DeleteInventoryInput{}
@@ -8360,7 +7934,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8369,8 +7942,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-maintenance-window":
 
+		case "pod.tzzh.ssm/delete-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteMaintenanceWindowInput{}
 			inputList := []ssm.DeleteMaintenanceWindowInput{}
@@ -8378,7 +7951,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8387,8 +7959,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-parameter":
 
+		case "pod.tzzh.ssm/delete-parameter":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteParameterInput{}
 			inputList := []ssm.DeleteParameterInput{}
@@ -8396,7 +7968,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8405,8 +7976,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-parameters":
 
+		case "pod.tzzh.ssm/delete-parameters":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteParametersInput{}
 			inputList := []ssm.DeleteParametersInput{}
@@ -8414,7 +7985,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8423,8 +7993,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-patch-baseline":
 
+		case "pod.tzzh.ssm/delete-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.DeletePatchBaselineInput{}
 			inputList := []ssm.DeletePatchBaselineInput{}
@@ -8432,7 +8002,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8441,8 +8010,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/delete-resource-data-sync":
 
+		case "pod.tzzh.ssm/delete-resource-data-sync":
 			svc := ssm.New(session.New())
 			input := &ssm.DeleteResourceDataSyncInput{}
 			inputList := []ssm.DeleteResourceDataSyncInput{}
@@ -8450,7 +8019,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8459,8 +8027,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/deregister-managed-instance":
 
+		case "pod.tzzh.ssm/deregister-managed-instance":
 			svc := ssm.New(session.New())
 			input := &ssm.DeregisterManagedInstanceInput{}
 			inputList := []ssm.DeregisterManagedInstanceInput{}
@@ -8468,7 +8036,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8477,8 +8044,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/deregister-patch-baseline-for-patch-group":
 
+		case "pod.tzzh.ssm/deregister-patch-baseline-for-patch-group":
 			svc := ssm.New(session.New())
 			input := &ssm.DeregisterPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.DeregisterPatchBaselineForPatchGroupInput{}
@@ -8486,7 +8053,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8495,8 +8061,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/deregister-target-from-maintenance-window":
 
+		case "pod.tzzh.ssm/deregister-target-from-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.DeregisterTargetFromMaintenanceWindowInput{}
 			inputList := []ssm.DeregisterTargetFromMaintenanceWindowInput{}
@@ -8504,7 +8070,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8513,8 +8078,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/deregister-task-from-maintenance-window":
 
+		case "pod.tzzh.ssm/deregister-task-from-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.DeregisterTaskFromMaintenanceWindowInput{}
 			inputList := []ssm.DeregisterTaskFromMaintenanceWindowInput{}
@@ -8522,7 +8087,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8531,8 +8095,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-activations":
 
+		case "pod.tzzh.ssm/describe-activations":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeActivationsInput{}
 			inputList := []ssm.DescribeActivationsInput{}
@@ -8540,7 +8104,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8549,8 +8112,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-association":
 
+		case "pod.tzzh.ssm/describe-association":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAssociationInput{}
 			inputList := []ssm.DescribeAssociationInput{}
@@ -8558,7 +8121,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8567,8 +8129,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-association-execution-targets":
 
+		case "pod.tzzh.ssm/describe-association-execution-targets":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAssociationExecutionTargetsInput{}
 			inputList := []ssm.DescribeAssociationExecutionTargetsInput{}
@@ -8576,7 +8138,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8585,8 +8146,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-association-executions":
 
+		case "pod.tzzh.ssm/describe-association-executions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAssociationExecutionsInput{}
 			inputList := []ssm.DescribeAssociationExecutionsInput{}
@@ -8594,7 +8155,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8603,8 +8163,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-automation-executions":
 
+		case "pod.tzzh.ssm/describe-automation-executions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAutomationExecutionsInput{}
 			inputList := []ssm.DescribeAutomationExecutionsInput{}
@@ -8612,7 +8172,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8621,8 +8180,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-automation-step-executions":
 
+		case "pod.tzzh.ssm/describe-automation-step-executions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAutomationStepExecutionsInput{}
 			inputList := []ssm.DescribeAutomationStepExecutionsInput{}
@@ -8630,7 +8189,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8639,8 +8197,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-available-patches":
 
+		case "pod.tzzh.ssm/describe-available-patches":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeAvailablePatchesInput{}
 			inputList := []ssm.DescribeAvailablePatchesInput{}
@@ -8648,7 +8206,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8657,8 +8214,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-document":
 
+		case "pod.tzzh.ssm/describe-document":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeDocumentInput{}
 			inputList := []ssm.DescribeDocumentInput{}
@@ -8666,7 +8223,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8675,8 +8231,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-document-permission":
 
+		case "pod.tzzh.ssm/describe-document-permission":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeDocumentPermissionInput{}
 			inputList := []ssm.DescribeDocumentPermissionInput{}
@@ -8684,7 +8240,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8693,8 +8248,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-effective-instance-associations":
 
+		case "pod.tzzh.ssm/describe-effective-instance-associations":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeEffectiveInstanceAssociationsInput{}
 			inputList := []ssm.DescribeEffectiveInstanceAssociationsInput{}
@@ -8702,7 +8257,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8711,8 +8265,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-effective-patches-for-patch-baseline":
 
+		case "pod.tzzh.ssm/describe-effective-patches-for-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeEffectivePatchesForPatchBaselineInput{}
 			inputList := []ssm.DescribeEffectivePatchesForPatchBaselineInput{}
@@ -8720,7 +8274,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8729,8 +8282,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-instance-associations-status":
 
+		case "pod.tzzh.ssm/describe-instance-associations-status":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInstanceAssociationsStatusInput{}
 			inputList := []ssm.DescribeInstanceAssociationsStatusInput{}
@@ -8738,7 +8291,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8747,8 +8299,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-instance-information":
 
+		case "pod.tzzh.ssm/describe-instance-information":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInstanceInformationInput{}
 			inputList := []ssm.DescribeInstanceInformationInput{}
@@ -8756,7 +8308,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8765,8 +8316,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-instance-patch-states":
 
+		case "pod.tzzh.ssm/describe-instance-patch-states":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInstancePatchStatesInput{}
 			inputList := []ssm.DescribeInstancePatchStatesInput{}
@@ -8774,7 +8325,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8783,8 +8333,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-instance-patch-states-for-patch-group":
 
+		case "pod.tzzh.ssm/describe-instance-patch-states-for-patch-group":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInstancePatchStatesForPatchGroupInput{}
 			inputList := []ssm.DescribeInstancePatchStatesForPatchGroupInput{}
@@ -8792,7 +8342,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8801,8 +8350,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-instance-patches":
 
+		case "pod.tzzh.ssm/describe-instance-patches":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInstancePatchesInput{}
 			inputList := []ssm.DescribeInstancePatchesInput{}
@@ -8810,7 +8359,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8819,8 +8367,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-inventory-deletions":
 
+		case "pod.tzzh.ssm/describe-inventory-deletions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeInventoryDeletionsInput{}
 			inputList := []ssm.DescribeInventoryDeletionsInput{}
@@ -8828,7 +8376,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8837,8 +8384,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-execution-task-invocations":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-execution-task-invocations":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowExecutionTaskInvocationsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionTaskInvocationsInput{}
@@ -8846,7 +8393,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8855,8 +8401,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-execution-tasks":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-execution-tasks":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowExecutionTasksInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionTasksInput{}
@@ -8864,7 +8410,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8873,8 +8418,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-executions":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-executions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowExecutionsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionsInput{}
@@ -8882,7 +8427,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8891,8 +8435,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-schedule":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-schedule":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowScheduleInput{}
 			inputList := []ssm.DescribeMaintenanceWindowScheduleInput{}
@@ -8900,7 +8444,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8909,8 +8452,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-targets":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-targets":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowTargetsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowTargetsInput{}
@@ -8918,7 +8461,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8927,8 +8469,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-window-tasks":
 
+		case "pod.tzzh.ssm/describe-maintenance-window-tasks":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowTasksInput{}
 			inputList := []ssm.DescribeMaintenanceWindowTasksInput{}
@@ -8936,7 +8478,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8945,8 +8486,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-windows":
 
+		case "pod.tzzh.ssm/describe-maintenance-windows":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowsInput{}
@@ -8954,7 +8495,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8963,8 +8503,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-maintenance-windows-for-target":
 
+		case "pod.tzzh.ssm/describe-maintenance-windows-for-target":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeMaintenanceWindowsForTargetInput{}
 			inputList := []ssm.DescribeMaintenanceWindowsForTargetInput{}
@@ -8972,7 +8512,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8981,8 +8520,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-ops-items":
 
+		case "pod.tzzh.ssm/describe-ops-items":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeOpsItemsInput{}
 			inputList := []ssm.DescribeOpsItemsInput{}
@@ -8990,7 +8529,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -8999,8 +8537,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-parameters":
 
+		case "pod.tzzh.ssm/describe-parameters":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeParametersInput{}
 			inputList := []ssm.DescribeParametersInput{}
@@ -9008,7 +8546,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9017,8 +8554,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-patch-baselines":
 
+		case "pod.tzzh.ssm/describe-patch-baselines":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribePatchBaselinesInput{}
 			inputList := []ssm.DescribePatchBaselinesInput{}
@@ -9026,7 +8563,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9035,8 +8571,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-patch-group-state":
 
+		case "pod.tzzh.ssm/describe-patch-group-state":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribePatchGroupStateInput{}
 			inputList := []ssm.DescribePatchGroupStateInput{}
@@ -9044,7 +8580,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9053,8 +8588,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-patch-groups":
 
+		case "pod.tzzh.ssm/describe-patch-groups":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribePatchGroupsInput{}
 			inputList := []ssm.DescribePatchGroupsInput{}
@@ -9062,7 +8597,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9071,8 +8605,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-patch-properties":
 
+		case "pod.tzzh.ssm/describe-patch-properties":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribePatchPropertiesInput{}
 			inputList := []ssm.DescribePatchPropertiesInput{}
@@ -9080,7 +8614,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9089,8 +8622,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/describe-sessions":
 
+		case "pod.tzzh.ssm/describe-sessions":
 			svc := ssm.New(session.New())
 			input := &ssm.DescribeSessionsInput{}
 			inputList := []ssm.DescribeSessionsInput{}
@@ -9098,7 +8631,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9107,8 +8639,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-automation-execution":
 
+		case "pod.tzzh.ssm/get-automation-execution":
 			svc := ssm.New(session.New())
 			input := &ssm.GetAutomationExecutionInput{}
 			inputList := []ssm.GetAutomationExecutionInput{}
@@ -9116,7 +8648,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9125,8 +8656,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-calendar-state":
 
+		case "pod.tzzh.ssm/get-calendar-state":
 			svc := ssm.New(session.New())
 			input := &ssm.GetCalendarStateInput{}
 			inputList := []ssm.GetCalendarStateInput{}
@@ -9134,7 +8665,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9143,8 +8673,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-command-invocation":
 
+		case "pod.tzzh.ssm/get-command-invocation":
 			svc := ssm.New(session.New())
 			input := &ssm.GetCommandInvocationInput{}
 			inputList := []ssm.GetCommandInvocationInput{}
@@ -9152,7 +8682,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9161,8 +8690,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-connection-status":
 
+		case "pod.tzzh.ssm/get-connection-status":
 			svc := ssm.New(session.New())
 			input := &ssm.GetConnectionStatusInput{}
 			inputList := []ssm.GetConnectionStatusInput{}
@@ -9170,7 +8699,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9179,8 +8707,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-default-patch-baseline":
 
+		case "pod.tzzh.ssm/get-default-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.GetDefaultPatchBaselineInput{}
 			inputList := []ssm.GetDefaultPatchBaselineInput{}
@@ -9188,7 +8716,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9197,8 +8724,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-deployable-patch-snapshot-for-instance":
 
+		case "pod.tzzh.ssm/get-deployable-patch-snapshot-for-instance":
 			svc := ssm.New(session.New())
 			input := &ssm.GetDeployablePatchSnapshotForInstanceInput{}
 			inputList := []ssm.GetDeployablePatchSnapshotForInstanceInput{}
@@ -9206,7 +8733,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9215,8 +8741,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-document":
 
+		case "pod.tzzh.ssm/get-document":
 			svc := ssm.New(session.New())
 			input := &ssm.GetDocumentInput{}
 			inputList := []ssm.GetDocumentInput{}
@@ -9224,7 +8750,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9233,8 +8758,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-inventory":
 
+		case "pod.tzzh.ssm/get-inventory":
 			svc := ssm.New(session.New())
 			input := &ssm.GetInventoryInput{}
 			inputList := []ssm.GetInventoryInput{}
@@ -9242,7 +8767,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9251,8 +8775,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-inventory-schema":
 
+		case "pod.tzzh.ssm/get-inventory-schema":
 			svc := ssm.New(session.New())
 			input := &ssm.GetInventorySchemaInput{}
 			inputList := []ssm.GetInventorySchemaInput{}
@@ -9260,7 +8784,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9269,8 +8792,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-maintenance-window":
 
+		case "pod.tzzh.ssm/get-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.GetMaintenanceWindowInput{}
 			inputList := []ssm.GetMaintenanceWindowInput{}
@@ -9278,7 +8801,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9287,8 +8809,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-maintenance-window-execution":
 
+		case "pod.tzzh.ssm/get-maintenance-window-execution":
 			svc := ssm.New(session.New())
 			input := &ssm.GetMaintenanceWindowExecutionInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionInput{}
@@ -9296,7 +8818,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9305,8 +8826,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-maintenance-window-execution-task":
 
+		case "pod.tzzh.ssm/get-maintenance-window-execution-task":
 			svc := ssm.New(session.New())
 			input := &ssm.GetMaintenanceWindowExecutionTaskInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionTaskInput{}
@@ -9314,7 +8835,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9323,8 +8843,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-maintenance-window-execution-task-invocation":
 
+		case "pod.tzzh.ssm/get-maintenance-window-execution-task-invocation":
 			svc := ssm.New(session.New())
 			input := &ssm.GetMaintenanceWindowExecutionTaskInvocationInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionTaskInvocationInput{}
@@ -9332,7 +8852,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9341,8 +8860,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-maintenance-window-task":
 
+		case "pod.tzzh.ssm/get-maintenance-window-task":
 			svc := ssm.New(session.New())
 			input := &ssm.GetMaintenanceWindowTaskInput{}
 			inputList := []ssm.GetMaintenanceWindowTaskInput{}
@@ -9350,7 +8869,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9359,8 +8877,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-ops-item":
 
+		case "pod.tzzh.ssm/get-ops-item":
 			svc := ssm.New(session.New())
 			input := &ssm.GetOpsItemInput{}
 			inputList := []ssm.GetOpsItemInput{}
@@ -9368,7 +8886,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9377,8 +8894,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-ops-summary":
 
+		case "pod.tzzh.ssm/get-ops-summary":
 			svc := ssm.New(session.New())
 			input := &ssm.GetOpsSummaryInput{}
 			inputList := []ssm.GetOpsSummaryInput{}
@@ -9386,7 +8903,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9395,8 +8911,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-parameter":
 
+		case "pod.tzzh.ssm/get-parameter":
 			svc := ssm.New(session.New())
 			input := &ssm.GetParameterInput{}
 			inputList := []ssm.GetParameterInput{}
@@ -9404,7 +8920,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9413,8 +8928,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-parameter-history":
 
+		case "pod.tzzh.ssm/get-parameter-history":
 			svc := ssm.New(session.New())
 			input := &ssm.GetParameterHistoryInput{}
 			inputList := []ssm.GetParameterHistoryInput{}
@@ -9422,7 +8937,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9431,8 +8945,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-parameters":
 
+		case "pod.tzzh.ssm/get-parameters":
 			svc := ssm.New(session.New())
 			input := &ssm.GetParametersInput{}
 			inputList := []ssm.GetParametersInput{}
@@ -9440,7 +8954,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9449,8 +8962,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-parameters-by-path":
 
+		case "pod.tzzh.ssm/get-parameters-by-path":
 			svc := ssm.New(session.New())
 			input := &ssm.GetParametersByPathInput{}
 			inputList := []ssm.GetParametersByPathInput{}
@@ -9458,7 +8971,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9467,8 +8979,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-patch-baseline":
 
+		case "pod.tzzh.ssm/get-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.GetPatchBaselineInput{}
 			inputList := []ssm.GetPatchBaselineInput{}
@@ -9476,7 +8988,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9485,8 +8996,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-patch-baseline-for-patch-group":
 
+		case "pod.tzzh.ssm/get-patch-baseline-for-patch-group":
 			svc := ssm.New(session.New())
 			input := &ssm.GetPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.GetPatchBaselineForPatchGroupInput{}
@@ -9494,7 +9005,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9503,8 +9013,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/get-service-setting":
 
+		case "pod.tzzh.ssm/get-service-setting":
 			svc := ssm.New(session.New())
 			input := &ssm.GetServiceSettingInput{}
 			inputList := []ssm.GetServiceSettingInput{}
@@ -9512,7 +9022,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9521,8 +9030,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/label-parameter-version":
 
+		case "pod.tzzh.ssm/label-parameter-version":
 			svc := ssm.New(session.New())
 			input := &ssm.LabelParameterVersionInput{}
 			inputList := []ssm.LabelParameterVersionInput{}
@@ -9530,7 +9039,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9539,8 +9047,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-association-versions":
 
+		case "pod.tzzh.ssm/list-association-versions":
 			svc := ssm.New(session.New())
 			input := &ssm.ListAssociationVersionsInput{}
 			inputList := []ssm.ListAssociationVersionsInput{}
@@ -9548,7 +9056,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9557,8 +9064,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-associations":
 
+		case "pod.tzzh.ssm/list-associations":
 			svc := ssm.New(session.New())
 			input := &ssm.ListAssociationsInput{}
 			inputList := []ssm.ListAssociationsInput{}
@@ -9566,7 +9073,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9575,8 +9081,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-command-invocations":
 
+		case "pod.tzzh.ssm/list-command-invocations":
 			svc := ssm.New(session.New())
 			input := &ssm.ListCommandInvocationsInput{}
 			inputList := []ssm.ListCommandInvocationsInput{}
@@ -9584,7 +9090,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9593,8 +9098,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-commands":
 
+		case "pod.tzzh.ssm/list-commands":
 			svc := ssm.New(session.New())
 			input := &ssm.ListCommandsInput{}
 			inputList := []ssm.ListCommandsInput{}
@@ -9602,7 +9107,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9611,8 +9115,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-compliance-items":
 
+		case "pod.tzzh.ssm/list-compliance-items":
 			svc := ssm.New(session.New())
 			input := &ssm.ListComplianceItemsInput{}
 			inputList := []ssm.ListComplianceItemsInput{}
@@ -9620,7 +9124,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9629,8 +9132,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-compliance-summaries":
 
+		case "pod.tzzh.ssm/list-compliance-summaries":
 			svc := ssm.New(session.New())
 			input := &ssm.ListComplianceSummariesInput{}
 			inputList := []ssm.ListComplianceSummariesInput{}
@@ -9638,7 +9141,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9647,8 +9149,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-document-versions":
 
+		case "pod.tzzh.ssm/list-document-versions":
 			svc := ssm.New(session.New())
 			input := &ssm.ListDocumentVersionsInput{}
 			inputList := []ssm.ListDocumentVersionsInput{}
@@ -9656,7 +9158,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9665,8 +9166,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-documents":
 
+		case "pod.tzzh.ssm/list-documents":
 			svc := ssm.New(session.New())
 			input := &ssm.ListDocumentsInput{}
 			inputList := []ssm.ListDocumentsInput{}
@@ -9674,7 +9175,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9683,8 +9183,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-inventory-entries":
 
+		case "pod.tzzh.ssm/list-inventory-entries":
 			svc := ssm.New(session.New())
 			input := &ssm.ListInventoryEntriesInput{}
 			inputList := []ssm.ListInventoryEntriesInput{}
@@ -9692,7 +9192,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9701,8 +9200,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-resource-compliance-summaries":
 
+		case "pod.tzzh.ssm/list-resource-compliance-summaries":
 			svc := ssm.New(session.New())
 			input := &ssm.ListResourceComplianceSummariesInput{}
 			inputList := []ssm.ListResourceComplianceSummariesInput{}
@@ -9710,7 +9209,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9719,8 +9217,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-resource-data-sync":
 
+		case "pod.tzzh.ssm/list-resource-data-sync":
 			svc := ssm.New(session.New())
 			input := &ssm.ListResourceDataSyncInput{}
 			inputList := []ssm.ListResourceDataSyncInput{}
@@ -9728,7 +9226,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9737,8 +9234,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/list-tags-for-resource":
 
+		case "pod.tzzh.ssm/list-tags-for-resource":
 			svc := ssm.New(session.New())
 			input := &ssm.ListTagsForResourceInput{}
 			inputList := []ssm.ListTagsForResourceInput{}
@@ -9746,7 +9243,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9755,8 +9251,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/modify-document-permission":
 
+		case "pod.tzzh.ssm/modify-document-permission":
 			svc := ssm.New(session.New())
 			input := &ssm.ModifyDocumentPermissionInput{}
 			inputList := []ssm.ModifyDocumentPermissionInput{}
@@ -9764,7 +9260,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9773,8 +9268,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/put-compliance-items":
 
+		case "pod.tzzh.ssm/put-compliance-items":
 			svc := ssm.New(session.New())
 			input := &ssm.PutComplianceItemsInput{}
 			inputList := []ssm.PutComplianceItemsInput{}
@@ -9782,7 +9277,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9791,8 +9285,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/put-inventory":
 
+		case "pod.tzzh.ssm/put-inventory":
 			svc := ssm.New(session.New())
 			input := &ssm.PutInventoryInput{}
 			inputList := []ssm.PutInventoryInput{}
@@ -9800,7 +9294,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9809,8 +9302,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/put-parameter":
 
+		case "pod.tzzh.ssm/put-parameter":
 			svc := ssm.New(session.New())
 			input := &ssm.PutParameterInput{}
 			inputList := []ssm.PutParameterInput{}
@@ -9818,7 +9311,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9827,8 +9319,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/register-default-patch-baseline":
 
+		case "pod.tzzh.ssm/register-default-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.RegisterDefaultPatchBaselineInput{}
 			inputList := []ssm.RegisterDefaultPatchBaselineInput{}
@@ -9836,7 +9328,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9845,8 +9336,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/register-patch-baseline-for-patch-group":
 
+		case "pod.tzzh.ssm/register-patch-baseline-for-patch-group":
 			svc := ssm.New(session.New())
 			input := &ssm.RegisterPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.RegisterPatchBaselineForPatchGroupInput{}
@@ -9854,7 +9345,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9863,8 +9353,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/register-target-with-maintenance-window":
 
+		case "pod.tzzh.ssm/register-target-with-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.RegisterTargetWithMaintenanceWindowInput{}
 			inputList := []ssm.RegisterTargetWithMaintenanceWindowInput{}
@@ -9872,7 +9362,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9881,8 +9370,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/register-task-with-maintenance-window":
 
+		case "pod.tzzh.ssm/register-task-with-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.RegisterTaskWithMaintenanceWindowInput{}
 			inputList := []ssm.RegisterTaskWithMaintenanceWindowInput{}
@@ -9890,7 +9379,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9899,8 +9387,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/remove-tags-from-resource":
 
+		case "pod.tzzh.ssm/remove-tags-from-resource":
 			svc := ssm.New(session.New())
 			input := &ssm.RemoveTagsFromResourceInput{}
 			inputList := []ssm.RemoveTagsFromResourceInput{}
@@ -9908,7 +9396,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9917,8 +9404,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/reset-service-setting":
 
+		case "pod.tzzh.ssm/reset-service-setting":
 			svc := ssm.New(session.New())
 			input := &ssm.ResetServiceSettingInput{}
 			inputList := []ssm.ResetServiceSettingInput{}
@@ -9926,7 +9413,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9935,8 +9421,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/resume-session":
 
+		case "pod.tzzh.ssm/resume-session":
 			svc := ssm.New(session.New())
 			input := &ssm.ResumeSessionInput{}
 			inputList := []ssm.ResumeSessionInput{}
@@ -9944,7 +9430,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9953,8 +9438,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/send-automation-signal":
 
+		case "pod.tzzh.ssm/send-automation-signal":
 			svc := ssm.New(session.New())
 			input := &ssm.SendAutomationSignalInput{}
 			inputList := []ssm.SendAutomationSignalInput{}
@@ -9962,7 +9447,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9971,8 +9455,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/send-command":
 
+		case "pod.tzzh.ssm/send-command":
 			svc := ssm.New(session.New())
 			input := &ssm.SendCommandInput{}
 			inputList := []ssm.SendCommandInput{}
@@ -9980,7 +9464,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -9989,8 +9472,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/start-associations-once":
 
+		case "pod.tzzh.ssm/start-associations-once":
 			svc := ssm.New(session.New())
 			input := &ssm.StartAssociationsOnceInput{}
 			inputList := []ssm.StartAssociationsOnceInput{}
@@ -9998,7 +9481,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10007,8 +9489,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/start-automation-execution":
 
+		case "pod.tzzh.ssm/start-automation-execution":
 			svc := ssm.New(session.New())
 			input := &ssm.StartAutomationExecutionInput{}
 			inputList := []ssm.StartAutomationExecutionInput{}
@@ -10016,7 +9498,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10025,8 +9506,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/start-session":
 
+		case "pod.tzzh.ssm/start-session":
 			svc := ssm.New(session.New())
 			input := &ssm.StartSessionInput{}
 			inputList := []ssm.StartSessionInput{}
@@ -10034,7 +9515,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10043,8 +9523,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/stop-automation-execution":
 
+		case "pod.tzzh.ssm/stop-automation-execution":
 			svc := ssm.New(session.New())
 			input := &ssm.StopAutomationExecutionInput{}
 			inputList := []ssm.StopAutomationExecutionInput{}
@@ -10052,7 +9532,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10061,8 +9540,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/terminate-session":
 
+		case "pod.tzzh.ssm/terminate-session":
 			svc := ssm.New(session.New())
 			input := &ssm.TerminateSessionInput{}
 			inputList := []ssm.TerminateSessionInput{}
@@ -10070,7 +9549,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10079,8 +9557,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-association":
 
+		case "pod.tzzh.ssm/update-association":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateAssociationInput{}
 			inputList := []ssm.UpdateAssociationInput{}
@@ -10088,7 +9566,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10097,8 +9574,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-association-status":
 
+		case "pod.tzzh.ssm/update-association-status":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateAssociationStatusInput{}
 			inputList := []ssm.UpdateAssociationStatusInput{}
@@ -10106,7 +9583,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10115,8 +9591,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-document":
 
+		case "pod.tzzh.ssm/update-document":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateDocumentInput{}
 			inputList := []ssm.UpdateDocumentInput{}
@@ -10124,7 +9600,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10133,8 +9608,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-document-default-version":
 
+		case "pod.tzzh.ssm/update-document-default-version":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateDocumentDefaultVersionInput{}
 			inputList := []ssm.UpdateDocumentDefaultVersionInput{}
@@ -10142,7 +9617,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10151,8 +9625,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-maintenance-window":
 
+		case "pod.tzzh.ssm/update-maintenance-window":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateMaintenanceWindowInput{}
 			inputList := []ssm.UpdateMaintenanceWindowInput{}
@@ -10160,7 +9634,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10169,8 +9642,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-maintenance-window-target":
 
+		case "pod.tzzh.ssm/update-maintenance-window-target":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateMaintenanceWindowTargetInput{}
 			inputList := []ssm.UpdateMaintenanceWindowTargetInput{}
@@ -10178,7 +9651,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10187,8 +9659,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-maintenance-window-task":
 
+		case "pod.tzzh.ssm/update-maintenance-window-task":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateMaintenanceWindowTaskInput{}
 			inputList := []ssm.UpdateMaintenanceWindowTaskInput{}
@@ -10196,7 +9668,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10205,8 +9676,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-managed-instance-role":
 
+		case "pod.tzzh.ssm/update-managed-instance-role":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateManagedInstanceRoleInput{}
 			inputList := []ssm.UpdateManagedInstanceRoleInput{}
@@ -10214,7 +9685,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10223,8 +9693,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-ops-item":
 
+		case "pod.tzzh.ssm/update-ops-item":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateOpsItemInput{}
 			inputList := []ssm.UpdateOpsItemInput{}
@@ -10232,7 +9702,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10241,8 +9710,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-patch-baseline":
 
+		case "pod.tzzh.ssm/update-patch-baseline":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdatePatchBaselineInput{}
 			inputList := []ssm.UpdatePatchBaselineInput{}
@@ -10250,7 +9719,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10259,8 +9727,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-resource-data-sync":
 
+		case "pod.tzzh.ssm/update-resource-data-sync":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateResourceDataSyncInput{}
 			inputList := []ssm.UpdateResourceDataSyncInput{}
@@ -10268,7 +9736,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10277,8 +9744,8 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				return nil, err
 			}
 			return res, nil
-		case "pod.tzzh.ssm/update-service-setting":
 
+		case "pod.tzzh.ssm/update-service-setting":
 			svc := ssm.New(session.New())
 			input := &ssm.UpdateServiceSettingInput{}
 			inputList := []ssm.UpdateServiceSettingInput{}
@@ -10286,7 +9753,6 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-
 			if len(inputList) > 0 {
 				input = &inputList[0]
 			}
@@ -10297,7 +9763,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		}
-	}
 
+	}
 	return nil, errors.New("Unsupported Operation")
 }
