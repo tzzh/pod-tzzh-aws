@@ -2,6 +2,9 @@
   (:require [clojure.java.shell :as shell]
             [clojure.string :as s]))
 
+(def SDK-VERSION
+  "v1.34.28")
+
 (def SERVICES
   "Services to generate code for"
   ["athena"
@@ -17,9 +20,8 @@
 (defn read-service-source
   "Read the source file from a given service in the go sdk"
   [service-name]
-  (let [go-path (System/getenv "GOPATH")
-        api-go (format "%s/src/github.com/aws/aws-sdk-go/service/%s/api.go" go-path service-name)]
-    (slurp api-go)))
+  (-> (format "https://raw.githubusercontent.com/aws/aws-sdk-go/%s/service/%s/api.go" SDK-VERSION service-name)
+      slurp))
 
 (defn find-fns
   "Extract all the fns to be generated from the source file"
