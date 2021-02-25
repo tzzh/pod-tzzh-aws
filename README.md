@@ -20,6 +20,7 @@ Get the latest release and then:
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
 (require '[pod.tzzh.dynamodb :as d])
 (require '[pod.tzzh.s3 :as s3])
+(require '[pod.tzzh.glue :as g])
 (require '[pod.tzzh.paginator :as p])
 
 
