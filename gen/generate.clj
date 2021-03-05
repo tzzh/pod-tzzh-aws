@@ -131,7 +131,7 @@ var SessionOptions = session.Options{}
              },
              {Name: \"pod.tzzh.podconfig\",
 					Vars: []babashka.Var{
-						{Name: \"configure-session\"},
+						{Name: \"set-session-options\"},
 					},
 				},
     %s
@@ -166,7 +166,7 @@ var SessionOptions = session.Options{}
        (s/join "\n"))]
   (format
     "switch message.Var {
-    case \"pod.tzzh.podconfig/configure-session\":
+    case \"pod.tzzh.podconfig/set-session-options\":
         var cfg []Config
 			err := json.Unmarshal([]byte(message.Args), &cfg)
 			if err != nil {

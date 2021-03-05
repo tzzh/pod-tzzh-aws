@@ -38,9 +38,9 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 							Code: `(defn get-paginator "Returns a fn that lazily fetches the pages for a given aws fn" [page-fn] (fn get-pages ([] (get-pages {})) ([input] (lazy-seq (let [page (page-fn input) next-continuation-token (:NextContinuationToken page) next-token (:NextToken page) next-marker (:NextMarker page)] (cond next-continuation-token (cons page (get-pages (assoc input :ContinuationToken next-continuation-token))) next-token (cons page (get-pages (assoc input :NextToken next-token))) next-marker (cons page (get-pages (assoc input :Marker next-marker))) :else [page]))))))`},
 					},
 				},
-				{Name: "pod.tzzh.config",
+				{Name: "pod.tzzh.podconfig",
 					Vars: []babashka.Var{
-						{Name: "configure-session"},
+						{Name: "set-creds"},
 					},
 				},
 				{Name: "pod.tzzh.athena",
@@ -682,7 +682,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 
 	} else if message.Op == "invoke" {
 		switch message.Var {
-		case "pod.tzzh.config/configure-session":
+		case "pod.tzzh.podconfig/set-creds":
 			var cfg []Config
 			err := json.Unmarshal([]byte(message.Args), &cfg)
 			if err != nil {
