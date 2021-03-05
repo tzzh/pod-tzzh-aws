@@ -14,6 +14,8 @@
    "lambda"
    "sqs"
    "ssm"
+   "sns"
+   "sts"
    "dynamodb"
    "s3"])
 
@@ -88,10 +90,16 @@
       "import (
 \"errors\"
 \"encoding/json\"
+\"github.com/aws/aws-sdk-go/aws\"
 \"github.com/aws/aws-sdk-go/aws/session\"
 %s
 \"github.com/tzzh/pod-tzzh-aws/babashka\"
       )
+type Config struct {
+	Profile string
+	Region  string
+}
+var SessionOptions = session.Options{}
 " aws-imports)))
 
 (defn build-ns-vars
@@ -121,12 +129,16 @@
                  Code: `%s`},
                 },
              },
+             {Name: \"pod.tzzh.podconfig\",
+					Vars: []babashka.Var{
+						{Name: \"configure-session\"},
+					},
+				},
     %s
         },
     }
   return response, nil
 " (str quoted-get-paginator) ns-list)))
-
 
 (defn build-invoke
   [namespaces]
@@ -134,7 +146,7 @@
                      (mapcat (fn [[namespace-name ns-fns]]
                                (map (fn [ns-fn]
                                       (format "case \"pod.tzzh.%1$s/%2$s\":
-            svc := %1$s.New(session.New())
+            svc := %1$s.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &%1$s.%4$s{}
 			inputList := []%1$s.%4$s{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -154,6 +166,20 @@
        (s/join "\n"))]
   (format
     "switch message.Var {
+    case \"pod.tzzh.podconfig/configure-session\":
+        var cfg []Config
+			err := json.Unmarshal([]byte(message.Args), &cfg)
+			if err != nil {
+				return nil, err
+			}
+			SessionOptions = session.Options{
+				Config: aws.Config{
+					Region: aws.String(cfg[0].Region),
+				},
+				Profile: cfg[0].Profile,
+                SharedConfigState: session.SharedConfigEnable,
+			}
+			return cfg[0], nil
     %s
 }
 " ns-list)))

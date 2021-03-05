@@ -4,6 +4,7 @@ package aws
 import (
 	"encoding/json"
 	"errors"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/athena"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -12,10 +13,19 @@ import (
 	"github.com/aws/aws-sdk-go/service/kinesis"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/tzzh/pod-tzzh-aws/babashka"
 )
+
+type Config struct {
+	Profile string
+	Region  string
+}
+
+var SessionOptions = session.Options{}
 
 func ProcessMessage(message *babashka.Message) (interface{}, error) {
 	if message.Op == "describe" {
@@ -26,6 +36,11 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 					Vars: []babashka.Var{
 						{Name: "get-paginator",
 							Code: `(defn get-paginator "Returns a fn that lazily fetches the pages for a given aws fn" [page-fn] (fn get-pages ([] (get-pages {})) ([input] (lazy-seq (let [page (page-fn input) next-continuation-token (:NextContinuationToken page) next-token (:NextToken page) next-marker (:NextMarker page)] (cond next-continuation-token (cons page (get-pages (assoc input :ContinuationToken next-continuation-token))) next-token (cons page (get-pages (assoc input :NextToken next-token))) next-marker (cons page (get-pages (assoc input :Marker next-marker))) :else [page]))))))`},
+					},
+				},
+				{Name: "pod.tzzh.config",
+					Vars: []babashka.Var{
+						{Name: "configure-session"},
 					},
 				},
 				{Name: "pod.tzzh.athena",
@@ -459,6 +474,44 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 					},
 				},
 
+				{Name: "pod.tzzh.sns",
+					Vars: []babashka.Var{
+						{Name: "add-permission"},
+						{Name: "check-if-phone-number-is-opted-out"},
+						{Name: "confirm-subscription"},
+						{Name: "create-platform-application"},
+						{Name: "create-platform-endpoint"},
+						{Name: "create-topic"},
+						{Name: "delete-endpoint"},
+						{Name: "delete-platform-application"},
+						{Name: "delete-topic"},
+						{Name: "get-endpoint-attributes"},
+						{Name: "get-platform-application-attributes"},
+						{Name: "get-s-m-s-attributes"},
+						{Name: "get-subscription-attributes"},
+						{Name: "get-topic-attributes"},
+						{Name: "list-endpoints-by-platform-application"},
+						{Name: "list-phone-numbers-opted-out"},
+						{Name: "list-platform-applications"},
+						{Name: "list-subscriptions"},
+						{Name: "list-subscriptions-by-topic"},
+						{Name: "list-tags-for-resource"},
+						{Name: "list-topics"},
+						{Name: "opt-in-phone-number"},
+						{Name: "publish"},
+						{Name: "remove-permission"},
+						{Name: "set-endpoint-attributes"},
+						{Name: "set-platform-application-attributes"},
+						{Name: "set-s-m-s-attributes"},
+						{Name: "set-subscription-attributes"},
+						{Name: "set-topic-attributes"},
+						{Name: "subscribe"},
+						{Name: "tag-resource"},
+						{Name: "unsubscribe"},
+						{Name: "untag-resource"},
+					},
+				},
+
 				{Name: "pod.tzzh.sqs",
 					Vars: []babashka.Var{
 						{Name: "add-permission"},
@@ -610,14 +663,41 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 						{Name: "update-service-setting"},
 					},
 				},
+
+				{Name: "pod.tzzh.sts",
+					Vars: []babashka.Var{
+						{Name: "assume-role"},
+						{Name: "assume-role-with-s-a-m-l"},
+						{Name: "assume-role-with-web-identity"},
+						{Name: "decode-authorization-message"},
+						{Name: "get-access-key-info"},
+						{Name: "get-caller-identity"},
+						{Name: "get-federation-token"},
+						{Name: "get-session-token"},
+					},
+				},
 			},
 		}
 		return response, nil
 
 	} else if message.Op == "invoke" {
 		switch message.Var {
+		case "pod.tzzh.config/configure-session":
+			var cfg []Config
+			err := json.Unmarshal([]byte(message.Args), &cfg)
+			if err != nil {
+				return nil, err
+			}
+			SessionOptions = session.Options{
+				Config: aws.Config{
+					Region: aws.String(cfg[0].Region),
+				},
+				Profile:           cfg[0].Profile,
+				SharedConfigState: session.SharedConfigEnable,
+			}
+			return cfg[0], nil
 		case "pod.tzzh.athena/batch-get-named-query":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.BatchGetNamedQueryInput{}
 			inputList := []athena.BatchGetNamedQueryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -634,7 +714,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/batch-get-query-execution":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.BatchGetQueryExecutionInput{}
 			inputList := []athena.BatchGetQueryExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -651,7 +731,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/create-data-catalog":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.CreateDataCatalogInput{}
 			inputList := []athena.CreateDataCatalogInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -668,7 +748,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/create-named-query":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.CreateNamedQueryInput{}
 			inputList := []athena.CreateNamedQueryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -685,7 +765,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/create-work-group":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.CreateWorkGroupInput{}
 			inputList := []athena.CreateWorkGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -702,7 +782,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/delete-data-catalog":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.DeleteDataCatalogInput{}
 			inputList := []athena.DeleteDataCatalogInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -719,7 +799,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/delete-named-query":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.DeleteNamedQueryInput{}
 			inputList := []athena.DeleteNamedQueryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -736,7 +816,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/delete-work-group":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.DeleteWorkGroupInput{}
 			inputList := []athena.DeleteWorkGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -753,7 +833,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-data-catalog":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetDataCatalogInput{}
 			inputList := []athena.GetDataCatalogInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -770,7 +850,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-database":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetDatabaseInput{}
 			inputList := []athena.GetDatabaseInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -787,7 +867,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-named-query":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetNamedQueryInput{}
 			inputList := []athena.GetNamedQueryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -804,7 +884,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-query-execution":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetQueryExecutionInput{}
 			inputList := []athena.GetQueryExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -821,7 +901,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-query-results":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetQueryResultsInput{}
 			inputList := []athena.GetQueryResultsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -838,7 +918,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-table-metadata":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetTableMetadataInput{}
 			inputList := []athena.GetTableMetadataInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -855,7 +935,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/get-work-group":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.GetWorkGroupInput{}
 			inputList := []athena.GetWorkGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -872,7 +952,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-data-catalogs":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListDataCatalogsInput{}
 			inputList := []athena.ListDataCatalogsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -889,7 +969,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-databases":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListDatabasesInput{}
 			inputList := []athena.ListDatabasesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -906,7 +986,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-named-queries":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListNamedQueriesInput{}
 			inputList := []athena.ListNamedQueriesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -923,7 +1003,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-query-executions":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListQueryExecutionsInput{}
 			inputList := []athena.ListQueryExecutionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -940,7 +1020,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-table-metadata":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListTableMetadataInput{}
 			inputList := []athena.ListTableMetadataInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -957,7 +1037,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-tags-for-resource":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListTagsForResourceInput{}
 			inputList := []athena.ListTagsForResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -974,7 +1054,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/list-work-groups":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.ListWorkGroupsInput{}
 			inputList := []athena.ListWorkGroupsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -991,7 +1071,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/start-query-execution":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.StartQueryExecutionInput{}
 			inputList := []athena.StartQueryExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1008,7 +1088,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/stop-query-execution":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.StopQueryExecutionInput{}
 			inputList := []athena.StopQueryExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1025,7 +1105,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/tag-resource":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.TagResourceInput{}
 			inputList := []athena.TagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1042,7 +1122,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/untag-resource":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.UntagResourceInput{}
 			inputList := []athena.UntagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1059,7 +1139,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/update-data-catalog":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.UpdateDataCatalogInput{}
 			inputList := []athena.UpdateDataCatalogInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1076,7 +1156,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.athena/update-work-group":
-			svc := athena.New(session.New())
+			svc := athena.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &athena.UpdateWorkGroupInput{}
 			inputList := []athena.UpdateWorkGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1093,7 +1173,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/batch-get-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.BatchGetItemInput{}
 			inputList := []dynamodb.BatchGetItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1110,7 +1190,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/batch-write-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.BatchWriteItemInput{}
 			inputList := []dynamodb.BatchWriteItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1127,7 +1207,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/create-backup":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.CreateBackupInput{}
 			inputList := []dynamodb.CreateBackupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1144,7 +1224,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/create-global-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.CreateGlobalTableInput{}
 			inputList := []dynamodb.CreateGlobalTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1161,7 +1241,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/create-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.CreateTableInput{}
 			inputList := []dynamodb.CreateTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1178,7 +1258,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/delete-backup":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DeleteBackupInput{}
 			inputList := []dynamodb.DeleteBackupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1195,7 +1275,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/delete-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DeleteItemInput{}
 			inputList := []dynamodb.DeleteItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1212,7 +1292,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/delete-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DeleteTableInput{}
 			inputList := []dynamodb.DeleteTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1229,7 +1309,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-backup":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeBackupInput{}
 			inputList := []dynamodb.DescribeBackupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1246,7 +1326,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-continuous-backups":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeContinuousBackupsInput{}
 			inputList := []dynamodb.DescribeContinuousBackupsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1263,7 +1343,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-contributor-insights":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeContributorInsightsInput{}
 			inputList := []dynamodb.DescribeContributorInsightsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1280,7 +1360,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-endpoints":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeEndpointsInput{}
 			inputList := []dynamodb.DescribeEndpointsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1297,7 +1377,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-global-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeGlobalTableInput{}
 			inputList := []dynamodb.DescribeGlobalTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1314,7 +1394,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-global-table-settings":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeGlobalTableSettingsInput{}
 			inputList := []dynamodb.DescribeGlobalTableSettingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1331,7 +1411,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-limits":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeLimitsInput{}
 			inputList := []dynamodb.DescribeLimitsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1348,7 +1428,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeTableInput{}
 			inputList := []dynamodb.DescribeTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1365,7 +1445,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-table-replica-auto-scaling":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeTableReplicaAutoScalingInput{}
 			inputList := []dynamodb.DescribeTableReplicaAutoScalingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1382,7 +1462,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/describe-time-to-live":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.DescribeTimeToLiveInput{}
 			inputList := []dynamodb.DescribeTimeToLiveInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1399,7 +1479,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/get-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.GetItemInput{}
 			inputList := []dynamodb.GetItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1416,7 +1496,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/list-backups":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ListBackupsInput{}
 			inputList := []dynamodb.ListBackupsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1433,7 +1513,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/list-contributor-insights":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ListContributorInsightsInput{}
 			inputList := []dynamodb.ListContributorInsightsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1450,7 +1530,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/list-global-tables":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ListGlobalTablesInput{}
 			inputList := []dynamodb.ListGlobalTablesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1467,7 +1547,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/list-tables":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ListTablesInput{}
 			inputList := []dynamodb.ListTablesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1484,7 +1564,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/list-tags-of-resource":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ListTagsOfResourceInput{}
 			inputList := []dynamodb.ListTagsOfResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1501,7 +1581,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/put-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.PutItemInput{}
 			inputList := []dynamodb.PutItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1518,7 +1598,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/query":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.QueryInput{}
 			inputList := []dynamodb.QueryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1535,7 +1615,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/restore-table-from-backup":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.RestoreTableFromBackupInput{}
 			inputList := []dynamodb.RestoreTableFromBackupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1552,7 +1632,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/restore-table-to-point-in-time":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.RestoreTableToPointInTimeInput{}
 			inputList := []dynamodb.RestoreTableToPointInTimeInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1569,7 +1649,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/scan":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.ScanInput{}
 			inputList := []dynamodb.ScanInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1586,7 +1666,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/tag-resource":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.TagResourceInput{}
 			inputList := []dynamodb.TagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1603,7 +1683,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/transact-get-items":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.TransactGetItemsInput{}
 			inputList := []dynamodb.TransactGetItemsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1620,7 +1700,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/transact-write-items":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.TransactWriteItemsInput{}
 			inputList := []dynamodb.TransactWriteItemsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1637,7 +1717,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/untag-resource":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UntagResourceInput{}
 			inputList := []dynamodb.UntagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1654,7 +1734,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-continuous-backups":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateContinuousBackupsInput{}
 			inputList := []dynamodb.UpdateContinuousBackupsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1671,7 +1751,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-contributor-insights":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateContributorInsightsInput{}
 			inputList := []dynamodb.UpdateContributorInsightsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1688,7 +1768,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-global-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateGlobalTableInput{}
 			inputList := []dynamodb.UpdateGlobalTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1705,7 +1785,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-global-table-settings":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateGlobalTableSettingsInput{}
 			inputList := []dynamodb.UpdateGlobalTableSettingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1722,7 +1802,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-item":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateItemInput{}
 			inputList := []dynamodb.UpdateItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1739,7 +1819,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-table":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateTableInput{}
 			inputList := []dynamodb.UpdateTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1756,7 +1836,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-table-replica-auto-scaling":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateTableReplicaAutoScalingInput{}
 			inputList := []dynamodb.UpdateTableReplicaAutoScalingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1773,7 +1853,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.dynamodb/update-time-to-live":
-			svc := dynamodb.New(session.New())
+			svc := dynamodb.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &dynamodb.UpdateTimeToLiveInput{}
 			inputList := []dynamodb.UpdateTimeToLiveInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1790,7 +1870,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-create-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchCreatePartitionInput{}
 			inputList := []glue.BatchCreatePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1807,7 +1887,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-delete-connection":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchDeleteConnectionInput{}
 			inputList := []glue.BatchDeleteConnectionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1824,7 +1904,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-delete-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchDeletePartitionInput{}
 			inputList := []glue.BatchDeletePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1841,7 +1921,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-delete-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchDeleteTableInput{}
 			inputList := []glue.BatchDeleteTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1858,7 +1938,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-delete-table-version":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchDeleteTableVersionInput{}
 			inputList := []glue.BatchDeleteTableVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1875,7 +1955,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-crawlers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetCrawlersInput{}
 			inputList := []glue.BatchGetCrawlersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1892,7 +1972,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-dev-endpoints":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetDevEndpointsInput{}
 			inputList := []glue.BatchGetDevEndpointsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1909,7 +1989,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-jobs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetJobsInput{}
 			inputList := []glue.BatchGetJobsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1926,7 +2006,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetPartitionInput{}
 			inputList := []glue.BatchGetPartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1943,7 +2023,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-triggers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetTriggersInput{}
 			inputList := []glue.BatchGetTriggersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1960,7 +2040,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-get-workflows":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchGetWorkflowsInput{}
 			inputList := []glue.BatchGetWorkflowsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1977,7 +2057,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-stop-job-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchStopJobRunInput{}
 			inputList := []glue.BatchStopJobRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -1994,7 +2074,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/batch-update-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.BatchUpdatePartitionInput{}
 			inputList := []glue.BatchUpdatePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2011,7 +2091,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/cancel-m-l-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CancelMLTaskRunInput{}
 			inputList := []glue.CancelMLTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2028,7 +2108,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-classifier":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateClassifierInput{}
 			inputList := []glue.CreateClassifierInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2045,7 +2125,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-connection":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateConnectionInput{}
 			inputList := []glue.CreateConnectionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2062,7 +2142,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateCrawlerInput{}
 			inputList := []glue.CreateCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2079,7 +2159,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-database":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateDatabaseInput{}
 			inputList := []glue.CreateDatabaseInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2096,7 +2176,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-dev-endpoint":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateDevEndpointInput{}
 			inputList := []glue.CreateDevEndpointInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2113,7 +2193,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-job":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateJobInput{}
 			inputList := []glue.CreateJobInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2130,7 +2210,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-m-l-transform":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateMLTransformInput{}
 			inputList := []glue.CreateMLTransformInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2147,7 +2227,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreatePartitionInput{}
 			inputList := []glue.CreatePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2164,7 +2244,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-script":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateScriptInput{}
 			inputList := []glue.CreateScriptInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2181,7 +2261,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-security-configuration":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateSecurityConfigurationInput{}
 			inputList := []glue.CreateSecurityConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2198,7 +2278,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateTableInput{}
 			inputList := []glue.CreateTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2215,7 +2295,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateTriggerInput{}
 			inputList := []glue.CreateTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2232,7 +2312,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-user-defined-function":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateUserDefinedFunctionInput{}
 			inputList := []glue.CreateUserDefinedFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2249,7 +2329,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/create-workflow":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.CreateWorkflowInput{}
 			inputList := []glue.CreateWorkflowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2266,7 +2346,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-classifier":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteClassifierInput{}
 			inputList := []glue.DeleteClassifierInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2283,7 +2363,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-column-statistics-for-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteColumnStatisticsForPartitionInput{}
 			inputList := []glue.DeleteColumnStatisticsForPartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2300,7 +2380,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-column-statistics-for-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteColumnStatisticsForTableInput{}
 			inputList := []glue.DeleteColumnStatisticsForTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2317,7 +2397,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-connection":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteConnectionInput{}
 			inputList := []glue.DeleteConnectionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2334,7 +2414,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteCrawlerInput{}
 			inputList := []glue.DeleteCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2351,7 +2431,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-database":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteDatabaseInput{}
 			inputList := []glue.DeleteDatabaseInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2368,7 +2448,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-dev-endpoint":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteDevEndpointInput{}
 			inputList := []glue.DeleteDevEndpointInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2385,7 +2465,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-job":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteJobInput{}
 			inputList := []glue.DeleteJobInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2402,7 +2482,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-m-l-transform":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteMLTransformInput{}
 			inputList := []glue.DeleteMLTransformInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2419,7 +2499,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeletePartitionInput{}
 			inputList := []glue.DeletePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2436,7 +2516,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-resource-policy":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteResourcePolicyInput{}
 			inputList := []glue.DeleteResourcePolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2453,7 +2533,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-security-configuration":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteSecurityConfigurationInput{}
 			inputList := []glue.DeleteSecurityConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2470,7 +2550,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteTableInput{}
 			inputList := []glue.DeleteTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2487,7 +2567,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-table-version":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteTableVersionInput{}
 			inputList := []glue.DeleteTableVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2504,7 +2584,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteTriggerInput{}
 			inputList := []glue.DeleteTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2521,7 +2601,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-user-defined-function":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteUserDefinedFunctionInput{}
 			inputList := []glue.DeleteUserDefinedFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2538,7 +2618,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/delete-workflow":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.DeleteWorkflowInput{}
 			inputList := []glue.DeleteWorkflowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2555,7 +2635,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-catalog-import-status":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetCatalogImportStatusInput{}
 			inputList := []glue.GetCatalogImportStatusInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2572,7 +2652,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-classifier":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetClassifierInput{}
 			inputList := []glue.GetClassifierInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2589,7 +2669,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-classifiers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetClassifiersInput{}
 			inputList := []glue.GetClassifiersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2606,7 +2686,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-column-statistics-for-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetColumnStatisticsForPartitionInput{}
 			inputList := []glue.GetColumnStatisticsForPartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2623,7 +2703,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-column-statistics-for-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetColumnStatisticsForTableInput{}
 			inputList := []glue.GetColumnStatisticsForTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2640,7 +2720,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-connection":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetConnectionInput{}
 			inputList := []glue.GetConnectionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2657,7 +2737,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-connections":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetConnectionsInput{}
 			inputList := []glue.GetConnectionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2674,7 +2754,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetCrawlerInput{}
 			inputList := []glue.GetCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2691,7 +2771,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-crawler-metrics":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetCrawlerMetricsInput{}
 			inputList := []glue.GetCrawlerMetricsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2708,7 +2788,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-crawlers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetCrawlersInput{}
 			inputList := []glue.GetCrawlersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2725,7 +2805,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-data-catalog-encryption-settings":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDataCatalogEncryptionSettingsInput{}
 			inputList := []glue.GetDataCatalogEncryptionSettingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2742,7 +2822,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-database":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDatabaseInput{}
 			inputList := []glue.GetDatabaseInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2759,7 +2839,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-databases":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDatabasesInput{}
 			inputList := []glue.GetDatabasesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2776,7 +2856,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-dataflow-graph":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDataflowGraphInput{}
 			inputList := []glue.GetDataflowGraphInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2793,7 +2873,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-dev-endpoint":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDevEndpointInput{}
 			inputList := []glue.GetDevEndpointInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2810,7 +2890,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-dev-endpoints":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetDevEndpointsInput{}
 			inputList := []glue.GetDevEndpointsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2827,7 +2907,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-job":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetJobInput{}
 			inputList := []glue.GetJobInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2844,7 +2924,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-job-bookmark":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetJobBookmarkInput{}
 			inputList := []glue.GetJobBookmarkInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2861,7 +2941,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-job-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetJobRunInput{}
 			inputList := []glue.GetJobRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2878,7 +2958,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-job-runs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetJobRunsInput{}
 			inputList := []glue.GetJobRunsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2895,7 +2975,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-jobs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetJobsInput{}
 			inputList := []glue.GetJobsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2912,7 +2992,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-m-l-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetMLTaskRunInput{}
 			inputList := []glue.GetMLTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2929,7 +3009,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-m-l-task-runs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetMLTaskRunsInput{}
 			inputList := []glue.GetMLTaskRunsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2946,7 +3026,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-m-l-transform":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetMLTransformInput{}
 			inputList := []glue.GetMLTransformInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2963,7 +3043,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-m-l-transforms":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetMLTransformsInput{}
 			inputList := []glue.GetMLTransformsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2980,7 +3060,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-mapping":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetMappingInput{}
 			inputList := []glue.GetMappingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -2997,7 +3077,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetPartitionInput{}
 			inputList := []glue.GetPartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3014,7 +3094,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-partition-indexes":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetPartitionIndexesInput{}
 			inputList := []glue.GetPartitionIndexesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3031,7 +3111,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-partitions":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetPartitionsInput{}
 			inputList := []glue.GetPartitionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3048,7 +3128,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-plan":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetPlanInput{}
 			inputList := []glue.GetPlanInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3065,7 +3145,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-resource-policies":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetResourcePoliciesInput{}
 			inputList := []glue.GetResourcePoliciesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3082,7 +3162,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-resource-policy":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetResourcePolicyInput{}
 			inputList := []glue.GetResourcePolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3099,7 +3179,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-security-configuration":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetSecurityConfigurationInput{}
 			inputList := []glue.GetSecurityConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3116,7 +3196,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-security-configurations":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetSecurityConfigurationsInput{}
 			inputList := []glue.GetSecurityConfigurationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3133,7 +3213,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTableInput{}
 			inputList := []glue.GetTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3150,7 +3230,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-table-version":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTableVersionInput{}
 			inputList := []glue.GetTableVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3167,7 +3247,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-table-versions":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTableVersionsInput{}
 			inputList := []glue.GetTableVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3184,7 +3264,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-tables":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTablesInput{}
 			inputList := []glue.GetTablesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3201,7 +3281,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-tags":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTagsInput{}
 			inputList := []glue.GetTagsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3218,7 +3298,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTriggerInput{}
 			inputList := []glue.GetTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3235,7 +3315,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-triggers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetTriggersInput{}
 			inputList := []glue.GetTriggersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3252,7 +3332,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-user-defined-function":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetUserDefinedFunctionInput{}
 			inputList := []glue.GetUserDefinedFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3269,7 +3349,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-user-defined-functions":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetUserDefinedFunctionsInput{}
 			inputList := []glue.GetUserDefinedFunctionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3286,7 +3366,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-workflow":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetWorkflowInput{}
 			inputList := []glue.GetWorkflowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3303,7 +3383,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-workflow-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetWorkflowRunInput{}
 			inputList := []glue.GetWorkflowRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3320,7 +3400,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-workflow-run-properties":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetWorkflowRunPropertiesInput{}
 			inputList := []glue.GetWorkflowRunPropertiesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3337,7 +3417,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/get-workflow-runs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.GetWorkflowRunsInput{}
 			inputList := []glue.GetWorkflowRunsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3354,7 +3434,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/import-catalog-to-glue":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ImportCatalogToGlueInput{}
 			inputList := []glue.ImportCatalogToGlueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3371,7 +3451,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-crawlers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListCrawlersInput{}
 			inputList := []glue.ListCrawlersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3388,7 +3468,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-dev-endpoints":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListDevEndpointsInput{}
 			inputList := []glue.ListDevEndpointsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3405,7 +3485,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-jobs":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListJobsInput{}
 			inputList := []glue.ListJobsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3422,7 +3502,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-m-l-transforms":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListMLTransformsInput{}
 			inputList := []glue.ListMLTransformsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3439,7 +3519,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-triggers":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListTriggersInput{}
 			inputList := []glue.ListTriggersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3456,7 +3536,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/list-workflows":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ListWorkflowsInput{}
 			inputList := []glue.ListWorkflowsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3473,7 +3553,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/put-data-catalog-encryption-settings":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.PutDataCatalogEncryptionSettingsInput{}
 			inputList := []glue.PutDataCatalogEncryptionSettingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3490,7 +3570,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/put-resource-policy":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.PutResourcePolicyInput{}
 			inputList := []glue.PutResourcePolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3507,7 +3587,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/put-workflow-run-properties":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.PutWorkflowRunPropertiesInput{}
 			inputList := []glue.PutWorkflowRunPropertiesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3524,7 +3604,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/reset-job-bookmark":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ResetJobBookmarkInput{}
 			inputList := []glue.ResetJobBookmarkInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3541,7 +3621,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/resume-workflow-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.ResumeWorkflowRunInput{}
 			inputList := []glue.ResumeWorkflowRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3558,7 +3638,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/search-tables":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.SearchTablesInput{}
 			inputList := []glue.SearchTablesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3575,7 +3655,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartCrawlerInput{}
 			inputList := []glue.StartCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3592,7 +3672,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-crawler-schedule":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartCrawlerScheduleInput{}
 			inputList := []glue.StartCrawlerScheduleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3609,7 +3689,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-export-labels-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartExportLabelsTaskRunInput{}
 			inputList := []glue.StartExportLabelsTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3626,7 +3706,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-import-labels-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartImportLabelsTaskRunInput{}
 			inputList := []glue.StartImportLabelsTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3643,7 +3723,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-job-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartJobRunInput{}
 			inputList := []glue.StartJobRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3660,7 +3740,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-m-l-evaluation-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartMLEvaluationTaskRunInput{}
 			inputList := []glue.StartMLEvaluationTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3677,7 +3757,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-m-l-labeling-set-generation-task-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartMLLabelingSetGenerationTaskRunInput{}
 			inputList := []glue.StartMLLabelingSetGenerationTaskRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3694,7 +3774,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartTriggerInput{}
 			inputList := []glue.StartTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3711,7 +3791,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/start-workflow-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StartWorkflowRunInput{}
 			inputList := []glue.StartWorkflowRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3728,7 +3808,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/stop-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StopCrawlerInput{}
 			inputList := []glue.StopCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3745,7 +3825,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/stop-crawler-schedule":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StopCrawlerScheduleInput{}
 			inputList := []glue.StopCrawlerScheduleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3762,7 +3842,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/stop-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StopTriggerInput{}
 			inputList := []glue.StopTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3779,7 +3859,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/stop-workflow-run":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.StopWorkflowRunInput{}
 			inputList := []glue.StopWorkflowRunInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3796,7 +3876,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/tag-resource":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.TagResourceInput{}
 			inputList := []glue.TagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3813,7 +3893,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/untag-resource":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UntagResourceInput{}
 			inputList := []glue.UntagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3830,7 +3910,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-classifier":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateClassifierInput{}
 			inputList := []glue.UpdateClassifierInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3847,7 +3927,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-column-statistics-for-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateColumnStatisticsForPartitionInput{}
 			inputList := []glue.UpdateColumnStatisticsForPartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3864,7 +3944,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-column-statistics-for-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateColumnStatisticsForTableInput{}
 			inputList := []glue.UpdateColumnStatisticsForTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3881,7 +3961,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-connection":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateConnectionInput{}
 			inputList := []glue.UpdateConnectionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3898,7 +3978,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-crawler":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateCrawlerInput{}
 			inputList := []glue.UpdateCrawlerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3915,7 +3995,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-crawler-schedule":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateCrawlerScheduleInput{}
 			inputList := []glue.UpdateCrawlerScheduleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3932,7 +4012,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-database":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateDatabaseInput{}
 			inputList := []glue.UpdateDatabaseInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3949,7 +4029,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-dev-endpoint":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateDevEndpointInput{}
 			inputList := []glue.UpdateDevEndpointInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3966,7 +4046,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-job":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateJobInput{}
 			inputList := []glue.UpdateJobInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -3983,7 +4063,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-m-l-transform":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateMLTransformInput{}
 			inputList := []glue.UpdateMLTransformInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4000,7 +4080,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-partition":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdatePartitionInput{}
 			inputList := []glue.UpdatePartitionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4017,7 +4097,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-table":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateTableInput{}
 			inputList := []glue.UpdateTableInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4034,7 +4114,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-trigger":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateTriggerInput{}
 			inputList := []glue.UpdateTriggerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4051,7 +4131,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-user-defined-function":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateUserDefinedFunctionInput{}
 			inputList := []glue.UpdateUserDefinedFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4068,7 +4148,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.glue/update-workflow":
-			svc := glue.New(session.New())
+			svc := glue.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &glue.UpdateWorkflowInput{}
 			inputList := []glue.UpdateWorkflowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4085,7 +4165,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/batch-associate-scram-secret":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.BatchAssociateScramSecretInput{}
 			inputList := []kafka.BatchAssociateScramSecretInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4102,7 +4182,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/batch-disassociate-scram-secret":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.BatchDisassociateScramSecretInput{}
 			inputList := []kafka.BatchDisassociateScramSecretInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4119,7 +4199,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/create-cluster":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.CreateClusterInput{}
 			inputList := []kafka.CreateClusterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4136,7 +4216,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/create-configuration":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.CreateConfigurationInput{}
 			inputList := []kafka.CreateConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4153,7 +4233,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/delete-cluster":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DeleteClusterInput{}
 			inputList := []kafka.DeleteClusterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4170,7 +4250,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/delete-configuration":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DeleteConfigurationInput{}
 			inputList := []kafka.DeleteConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4187,7 +4267,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/describe-cluster":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DescribeClusterInput{}
 			inputList := []kafka.DescribeClusterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4204,7 +4284,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/describe-cluster-operation":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DescribeClusterOperationInput{}
 			inputList := []kafka.DescribeClusterOperationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4221,7 +4301,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/describe-configuration":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DescribeConfigurationInput{}
 			inputList := []kafka.DescribeConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4238,7 +4318,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/describe-configuration-revision":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.DescribeConfigurationRevisionInput{}
 			inputList := []kafka.DescribeConfigurationRevisionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4255,7 +4335,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/get-bootstrap-brokers":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.GetBootstrapBrokersInput{}
 			inputList := []kafka.GetBootstrapBrokersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4272,7 +4352,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/get-compatible-kafka-versions":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.GetCompatibleKafkaVersionsInput{}
 			inputList := []kafka.GetCompatibleKafkaVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4289,7 +4369,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-cluster-operations":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListClusterOperationsInput{}
 			inputList := []kafka.ListClusterOperationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4306,7 +4386,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-clusters":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListClustersInput{}
 			inputList := []kafka.ListClustersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4323,7 +4403,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-configuration-revisions":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListConfigurationRevisionsInput{}
 			inputList := []kafka.ListConfigurationRevisionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4340,7 +4420,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-configurations":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListConfigurationsInput{}
 			inputList := []kafka.ListConfigurationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4357,7 +4437,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-kafka-versions":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListKafkaVersionsInput{}
 			inputList := []kafka.ListKafkaVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4374,7 +4454,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-nodes":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListNodesInput{}
 			inputList := []kafka.ListNodesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4391,7 +4471,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-scram-secrets":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListScramSecretsInput{}
 			inputList := []kafka.ListScramSecretsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4408,7 +4488,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/list-tags-for-resource":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.ListTagsForResourceInput{}
 			inputList := []kafka.ListTagsForResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4425,7 +4505,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/reboot-broker":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.RebootBrokerInput{}
 			inputList := []kafka.RebootBrokerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4442,7 +4522,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/tag-resource":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.TagResourceInput{}
 			inputList := []kafka.TagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4459,7 +4539,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/untag-resource":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UntagResourceInput{}
 			inputList := []kafka.UntagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4476,7 +4556,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-broker-count":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateBrokerCountInput{}
 			inputList := []kafka.UpdateBrokerCountInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4493,7 +4573,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-broker-storage":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateBrokerStorageInput{}
 			inputList := []kafka.UpdateBrokerStorageInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4510,7 +4590,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-cluster-configuration":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateClusterConfigurationInput{}
 			inputList := []kafka.UpdateClusterConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4527,7 +4607,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-cluster-kafka-version":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateClusterKafkaVersionInput{}
 			inputList := []kafka.UpdateClusterKafkaVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4544,7 +4624,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-configuration":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateConfigurationInput{}
 			inputList := []kafka.UpdateConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4561,7 +4641,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kafka/update-monitoring":
-			svc := kafka.New(session.New())
+			svc := kafka.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kafka.UpdateMonitoringInput{}
 			inputList := []kafka.UpdateMonitoringInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4578,7 +4658,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/add-tags-to-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.AddTagsToStreamInput{}
 			inputList := []kinesis.AddTagsToStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4595,7 +4675,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/create-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.CreateStreamInput{}
 			inputList := []kinesis.CreateStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4612,7 +4692,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/decrease-stream-retention-period":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DecreaseStreamRetentionPeriodInput{}
 			inputList := []kinesis.DecreaseStreamRetentionPeriodInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4629,7 +4709,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/delete-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DeleteStreamInput{}
 			inputList := []kinesis.DeleteStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4646,7 +4726,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/deregister-stream-consumer":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DeregisterStreamConsumerInput{}
 			inputList := []kinesis.DeregisterStreamConsumerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4663,7 +4743,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/describe-limits":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DescribeLimitsInput{}
 			inputList := []kinesis.DescribeLimitsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4680,7 +4760,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/describe-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DescribeStreamInput{}
 			inputList := []kinesis.DescribeStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4697,7 +4777,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/describe-stream-consumer":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DescribeStreamConsumerInput{}
 			inputList := []kinesis.DescribeStreamConsumerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4714,7 +4794,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/describe-stream-summary":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DescribeStreamSummaryInput{}
 			inputList := []kinesis.DescribeStreamSummaryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4731,7 +4811,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/disable-enhanced-monitoring":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.DisableEnhancedMonitoringInput{}
 			inputList := []kinesis.DisableEnhancedMonitoringInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4748,7 +4828,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/enable-enhanced-monitoring":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.EnableEnhancedMonitoringInput{}
 			inputList := []kinesis.EnableEnhancedMonitoringInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4765,7 +4845,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/get-records":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.GetRecordsInput{}
 			inputList := []kinesis.GetRecordsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4782,7 +4862,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/get-shard-iterator":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.GetShardIteratorInput{}
 			inputList := []kinesis.GetShardIteratorInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4799,7 +4879,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/increase-stream-retention-period":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.IncreaseStreamRetentionPeriodInput{}
 			inputList := []kinesis.IncreaseStreamRetentionPeriodInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4816,7 +4896,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/list-shards":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.ListShardsInput{}
 			inputList := []kinesis.ListShardsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4833,7 +4913,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/list-stream-consumers":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.ListStreamConsumersInput{}
 			inputList := []kinesis.ListStreamConsumersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4850,7 +4930,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/list-streams":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.ListStreamsInput{}
 			inputList := []kinesis.ListStreamsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4867,7 +4947,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/list-tags-for-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.ListTagsForStreamInput{}
 			inputList := []kinesis.ListTagsForStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4884,7 +4964,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/merge-shards":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.MergeShardsInput{}
 			inputList := []kinesis.MergeShardsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4901,7 +4981,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/put-record":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.PutRecordInput{}
 			inputList := []kinesis.PutRecordInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4918,7 +4998,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/put-records":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.PutRecordsInput{}
 			inputList := []kinesis.PutRecordsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4935,7 +5015,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/register-stream-consumer":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.RegisterStreamConsumerInput{}
 			inputList := []kinesis.RegisterStreamConsumerInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4952,7 +5032,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/remove-tags-from-stream":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.RemoveTagsFromStreamInput{}
 			inputList := []kinesis.RemoveTagsFromStreamInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4969,7 +5049,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/split-shard":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.SplitShardInput{}
 			inputList := []kinesis.SplitShardInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -4986,7 +5066,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/start-stream-encryption":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.StartStreamEncryptionInput{}
 			inputList := []kinesis.StartStreamEncryptionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5003,7 +5083,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/stop-stream-encryption":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.StopStreamEncryptionInput{}
 			inputList := []kinesis.StopStreamEncryptionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5020,7 +5100,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/subscribe-to-shard":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.SubscribeToShardInput{}
 			inputList := []kinesis.SubscribeToShardInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5037,7 +5117,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.kinesis/update-shard-count":
-			svc := kinesis.New(session.New())
+			svc := kinesis.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &kinesis.UpdateShardCountInput{}
 			inputList := []kinesis.UpdateShardCountInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5054,7 +5134,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/add-layer-version-permission":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.AddLayerVersionPermissionInput{}
 			inputList := []lambda.AddLayerVersionPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5071,7 +5151,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/add-permission":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.AddPermissionInput{}
 			inputList := []lambda.AddPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5088,7 +5168,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/create-alias":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.CreateAliasInput{}
 			inputList := []lambda.CreateAliasInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5105,7 +5185,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/create-event-source-mapping":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.CreateEventSourceMappingInput{}
 			inputList := []lambda.CreateEventSourceMappingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5122,7 +5202,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/create-function":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.CreateFunctionInput{}
 			inputList := []lambda.CreateFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5139,7 +5219,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-alias":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteAliasInput{}
 			inputList := []lambda.DeleteAliasInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5156,7 +5236,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-event-source-mapping":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteEventSourceMappingInput{}
 			inputList := []lambda.DeleteEventSourceMappingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5173,7 +5253,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-function":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteFunctionInput{}
 			inputList := []lambda.DeleteFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5190,7 +5270,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-function-concurrency":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteFunctionConcurrencyInput{}
 			inputList := []lambda.DeleteFunctionConcurrencyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5207,7 +5287,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-function-event-invoke-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteFunctionEventInvokeConfigInput{}
 			inputList := []lambda.DeleteFunctionEventInvokeConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5224,7 +5304,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-layer-version":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteLayerVersionInput{}
 			inputList := []lambda.DeleteLayerVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5241,7 +5321,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/delete-provisioned-concurrency-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.DeleteProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.DeleteProvisionedConcurrencyConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5258,7 +5338,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-account-settings":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetAccountSettingsInput{}
 			inputList := []lambda.GetAccountSettingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5275,7 +5355,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-alias":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetAliasInput{}
 			inputList := []lambda.GetAliasInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5292,7 +5372,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-event-source-mapping":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetEventSourceMappingInput{}
 			inputList := []lambda.GetEventSourceMappingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5309,7 +5389,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-function":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetFunctionInput{}
 			inputList := []lambda.GetFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5326,7 +5406,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-function-concurrency":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetFunctionConcurrencyInput{}
 			inputList := []lambda.GetFunctionConcurrencyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5343,7 +5423,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-function-configuration":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetFunctionConfigurationInput{}
 			inputList := []lambda.GetFunctionConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5360,7 +5440,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-function-event-invoke-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetFunctionEventInvokeConfigInput{}
 			inputList := []lambda.GetFunctionEventInvokeConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5377,7 +5457,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-layer-version":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetLayerVersionInput{}
 			inputList := []lambda.GetLayerVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5394,7 +5474,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-layer-version-by-arn":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetLayerVersionByArnInput{}
 			inputList := []lambda.GetLayerVersionByArnInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5411,7 +5491,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-layer-version-policy":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetLayerVersionPolicyInput{}
 			inputList := []lambda.GetLayerVersionPolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5428,7 +5508,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-policy":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetPolicyInput{}
 			inputList := []lambda.GetPolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5445,7 +5525,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/get-provisioned-concurrency-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.GetProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.GetProvisionedConcurrencyConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5462,7 +5542,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/invoke":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.InvokeInput{}
 			inputList := []lambda.InvokeInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5479,7 +5559,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/invoke-async":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.InvokeAsyncInput{}
 			inputList := []lambda.InvokeAsyncInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5496,7 +5576,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-aliases":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListAliasesInput{}
 			inputList := []lambda.ListAliasesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5513,7 +5593,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-event-source-mappings":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListEventSourceMappingsInput{}
 			inputList := []lambda.ListEventSourceMappingsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5530,7 +5610,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-function-event-invoke-configs":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListFunctionEventInvokeConfigsInput{}
 			inputList := []lambda.ListFunctionEventInvokeConfigsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5547,7 +5627,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-functions":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListFunctionsInput{}
 			inputList := []lambda.ListFunctionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5564,7 +5644,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-layer-versions":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListLayerVersionsInput{}
 			inputList := []lambda.ListLayerVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5581,7 +5661,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-layers":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListLayersInput{}
 			inputList := []lambda.ListLayersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5598,7 +5678,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-provisioned-concurrency-configs":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListProvisionedConcurrencyConfigsInput{}
 			inputList := []lambda.ListProvisionedConcurrencyConfigsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5615,7 +5695,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-tags":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListTagsInput{}
 			inputList := []lambda.ListTagsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5632,7 +5712,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/list-versions-by-function":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.ListVersionsByFunctionInput{}
 			inputList := []lambda.ListVersionsByFunctionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5649,7 +5729,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/publish-layer-version":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.PublishLayerVersionInput{}
 			inputList := []lambda.PublishLayerVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5666,7 +5746,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/publish-version":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.PublishVersionInput{}
 			inputList := []lambda.PublishVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5683,7 +5763,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/put-function-concurrency":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.PutFunctionConcurrencyInput{}
 			inputList := []lambda.PutFunctionConcurrencyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5700,7 +5780,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/put-function-event-invoke-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.PutFunctionEventInvokeConfigInput{}
 			inputList := []lambda.PutFunctionEventInvokeConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5717,7 +5797,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/put-provisioned-concurrency-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.PutProvisionedConcurrencyConfigInput{}
 			inputList := []lambda.PutProvisionedConcurrencyConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5734,7 +5814,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/remove-layer-version-permission":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.RemoveLayerVersionPermissionInput{}
 			inputList := []lambda.RemoveLayerVersionPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5751,7 +5831,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/remove-permission":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.RemovePermissionInput{}
 			inputList := []lambda.RemovePermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5768,7 +5848,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/tag-resource":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.TagResourceInput{}
 			inputList := []lambda.TagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5785,7 +5865,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/untag-resource":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UntagResourceInput{}
 			inputList := []lambda.UntagResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5802,7 +5882,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/update-alias":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UpdateAliasInput{}
 			inputList := []lambda.UpdateAliasInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5819,7 +5899,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/update-event-source-mapping":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UpdateEventSourceMappingInput{}
 			inputList := []lambda.UpdateEventSourceMappingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5836,7 +5916,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/update-function-code":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UpdateFunctionCodeInput{}
 			inputList := []lambda.UpdateFunctionCodeInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5853,7 +5933,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/update-function-configuration":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UpdateFunctionConfigurationInput{}
 			inputList := []lambda.UpdateFunctionConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5870,7 +5950,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.lambda/update-function-event-invoke-config":
-			svc := lambda.New(session.New())
+			svc := lambda.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &lambda.UpdateFunctionEventInvokeConfigInput{}
 			inputList := []lambda.UpdateFunctionEventInvokeConfigInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5887,7 +5967,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/abort-multipart-upload":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.AbortMultipartUploadInput{}
 			inputList := []s3.AbortMultipartUploadInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5904,7 +5984,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/complete-multipart-upload":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.CompleteMultipartUploadInput{}
 			inputList := []s3.CompleteMultipartUploadInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5921,7 +6001,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/copy-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.CopyObjectInput{}
 			inputList := []s3.CopyObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5938,7 +6018,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/create-bucket":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.CreateBucketInput{}
 			inputList := []s3.CreateBucketInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5955,7 +6035,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/create-multipart-upload":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.CreateMultipartUploadInput{}
 			inputList := []s3.CreateMultipartUploadInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5972,7 +6052,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketInput{}
 			inputList := []s3.DeleteBucketInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -5989,7 +6069,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-analytics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketAnalyticsConfigurationInput{}
 			inputList := []s3.DeleteBucketAnalyticsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6006,7 +6086,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-cors":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketCorsInput{}
 			inputList := []s3.DeleteBucketCorsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6023,7 +6103,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-encryption":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketEncryptionInput{}
 			inputList := []s3.DeleteBucketEncryptionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6040,7 +6120,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-inventory-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketInventoryConfigurationInput{}
 			inputList := []s3.DeleteBucketInventoryConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6057,7 +6137,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-lifecycle":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketLifecycleInput{}
 			inputList := []s3.DeleteBucketLifecycleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6074,7 +6154,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-metrics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketMetricsConfigurationInput{}
 			inputList := []s3.DeleteBucketMetricsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6091,7 +6171,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-policy":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketPolicyInput{}
 			inputList := []s3.DeleteBucketPolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6108,7 +6188,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-replication":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketReplicationInput{}
 			inputList := []s3.DeleteBucketReplicationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6125,7 +6205,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketTaggingInput{}
 			inputList := []s3.DeleteBucketTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6142,7 +6222,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-bucket-website":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteBucketWebsiteInput{}
 			inputList := []s3.DeleteBucketWebsiteInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6159,7 +6239,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteObjectInput{}
 			inputList := []s3.DeleteObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6176,7 +6256,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-object-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteObjectTaggingInput{}
 			inputList := []s3.DeleteObjectTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6193,7 +6273,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-objects":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeleteObjectsInput{}
 			inputList := []s3.DeleteObjectsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6210,7 +6290,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/delete-public-access-block":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.DeletePublicAccessBlockInput{}
 			inputList := []s3.DeletePublicAccessBlockInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6227,7 +6307,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-accelerate-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketAccelerateConfigurationInput{}
 			inputList := []s3.GetBucketAccelerateConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6244,7 +6324,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-acl":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketAclInput{}
 			inputList := []s3.GetBucketAclInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6261,7 +6341,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-analytics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketAnalyticsConfigurationInput{}
 			inputList := []s3.GetBucketAnalyticsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6278,7 +6358,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-cors":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketCorsInput{}
 			inputList := []s3.GetBucketCorsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6295,7 +6375,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-encryption":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketEncryptionInput{}
 			inputList := []s3.GetBucketEncryptionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6312,7 +6392,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-inventory-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketInventoryConfigurationInput{}
 			inputList := []s3.GetBucketInventoryConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6329,7 +6409,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-lifecycle":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketLifecycleInput{}
 			inputList := []s3.GetBucketLifecycleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6346,7 +6426,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-lifecycle-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketLifecycleConfigurationInput{}
 			inputList := []s3.GetBucketLifecycleConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6363,7 +6443,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-location":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketLocationInput{}
 			inputList := []s3.GetBucketLocationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6380,7 +6460,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-logging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketLoggingInput{}
 			inputList := []s3.GetBucketLoggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6397,7 +6477,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-metrics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketMetricsConfigurationInput{}
 			inputList := []s3.GetBucketMetricsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6414,7 +6494,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-policy":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketPolicyInput{}
 			inputList := []s3.GetBucketPolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6431,7 +6511,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-policy-status":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketPolicyStatusInput{}
 			inputList := []s3.GetBucketPolicyStatusInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6448,7 +6528,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-replication":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketReplicationInput{}
 			inputList := []s3.GetBucketReplicationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6465,7 +6545,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-request-payment":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketRequestPaymentInput{}
 			inputList := []s3.GetBucketRequestPaymentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6482,7 +6562,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketTaggingInput{}
 			inputList := []s3.GetBucketTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6499,7 +6579,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-versioning":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketVersioningInput{}
 			inputList := []s3.GetBucketVersioningInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6516,7 +6596,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-bucket-website":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetBucketWebsiteInput{}
 			inputList := []s3.GetBucketWebsiteInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6533,7 +6613,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectInput{}
 			inputList := []s3.GetObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6550,7 +6630,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-acl":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectAclInput{}
 			inputList := []s3.GetObjectAclInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6567,7 +6647,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-legal-hold":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectLegalHoldInput{}
 			inputList := []s3.GetObjectLegalHoldInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6584,7 +6664,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-lock-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectLockConfigurationInput{}
 			inputList := []s3.GetObjectLockConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6601,7 +6681,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-retention":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectRetentionInput{}
 			inputList := []s3.GetObjectRetentionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6618,7 +6698,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectTaggingInput{}
 			inputList := []s3.GetObjectTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6635,7 +6715,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-object-torrent":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetObjectTorrentInput{}
 			inputList := []s3.GetObjectTorrentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6652,7 +6732,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/get-public-access-block":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.GetPublicAccessBlockInput{}
 			inputList := []s3.GetPublicAccessBlockInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6669,7 +6749,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/head-bucket":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.HeadBucketInput{}
 			inputList := []s3.HeadBucketInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6686,7 +6766,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/head-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.HeadObjectInput{}
 			inputList := []s3.HeadObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6703,7 +6783,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-bucket-analytics-configurations":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListBucketAnalyticsConfigurationsInput{}
 			inputList := []s3.ListBucketAnalyticsConfigurationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6720,7 +6800,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-bucket-inventory-configurations":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListBucketInventoryConfigurationsInput{}
 			inputList := []s3.ListBucketInventoryConfigurationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6737,7 +6817,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-bucket-metrics-configurations":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListBucketMetricsConfigurationsInput{}
 			inputList := []s3.ListBucketMetricsConfigurationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6754,7 +6834,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-buckets":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListBucketsInput{}
 			inputList := []s3.ListBucketsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6771,7 +6851,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-multipart-uploads":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListMultipartUploadsInput{}
 			inputList := []s3.ListMultipartUploadsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6788,7 +6868,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-object-versions":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListObjectVersionsInput{}
 			inputList := []s3.ListObjectVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6805,7 +6885,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-objects":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListObjectsInput{}
 			inputList := []s3.ListObjectsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6822,7 +6902,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-objects-v2":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListObjectsV2Input{}
 			inputList := []s3.ListObjectsV2Input{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6839,7 +6919,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/list-parts":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.ListPartsInput{}
 			inputList := []s3.ListPartsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6856,7 +6936,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-accelerate-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketAccelerateConfigurationInput{}
 			inputList := []s3.PutBucketAccelerateConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6873,7 +6953,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-acl":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketAclInput{}
 			inputList := []s3.PutBucketAclInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6890,7 +6970,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-analytics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketAnalyticsConfigurationInput{}
 			inputList := []s3.PutBucketAnalyticsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6907,7 +6987,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-cors":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketCorsInput{}
 			inputList := []s3.PutBucketCorsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6924,7 +7004,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-encryption":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketEncryptionInput{}
 			inputList := []s3.PutBucketEncryptionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6941,7 +7021,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-inventory-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketInventoryConfigurationInput{}
 			inputList := []s3.PutBucketInventoryConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6958,7 +7038,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-lifecycle":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketLifecycleInput{}
 			inputList := []s3.PutBucketLifecycleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6975,7 +7055,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-lifecycle-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketLifecycleConfigurationInput{}
 			inputList := []s3.PutBucketLifecycleConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -6992,7 +7072,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-logging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketLoggingInput{}
 			inputList := []s3.PutBucketLoggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7009,7 +7089,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-metrics-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketMetricsConfigurationInput{}
 			inputList := []s3.PutBucketMetricsConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7026,7 +7106,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-notification":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketNotificationInput{}
 			inputList := []s3.PutBucketNotificationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7043,7 +7123,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-notification-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketNotificationConfigurationInput{}
 			inputList := []s3.PutBucketNotificationConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7060,7 +7140,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-policy":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketPolicyInput{}
 			inputList := []s3.PutBucketPolicyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7077,7 +7157,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-replication":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketReplicationInput{}
 			inputList := []s3.PutBucketReplicationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7094,7 +7174,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-request-payment":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketRequestPaymentInput{}
 			inputList := []s3.PutBucketRequestPaymentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7111,7 +7191,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketTaggingInput{}
 			inputList := []s3.PutBucketTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7128,7 +7208,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-versioning":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketVersioningInput{}
 			inputList := []s3.PutBucketVersioningInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7145,7 +7225,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-bucket-website":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutBucketWebsiteInput{}
 			inputList := []s3.PutBucketWebsiteInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7162,7 +7242,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectInput{}
 			inputList := []s3.PutObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7179,7 +7259,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object-acl":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectAclInput{}
 			inputList := []s3.PutObjectAclInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7196,7 +7276,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object-legal-hold":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectLegalHoldInput{}
 			inputList := []s3.PutObjectLegalHoldInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7213,7 +7293,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object-lock-configuration":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectLockConfigurationInput{}
 			inputList := []s3.PutObjectLockConfigurationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7230,7 +7310,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object-retention":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectRetentionInput{}
 			inputList := []s3.PutObjectRetentionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7247,7 +7327,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-object-tagging":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutObjectTaggingInput{}
 			inputList := []s3.PutObjectTaggingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7264,7 +7344,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/put-public-access-block":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.PutPublicAccessBlockInput{}
 			inputList := []s3.PutPublicAccessBlockInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7281,7 +7361,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/restore-object":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.RestoreObjectInput{}
 			inputList := []s3.RestoreObjectInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7298,7 +7378,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/select-object-content":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.SelectObjectContentInput{}
 			inputList := []s3.SelectObjectContentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7315,7 +7395,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/upload-part":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.UploadPartInput{}
 			inputList := []s3.UploadPartInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7332,7 +7412,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.s3/upload-part-copy":
-			svc := s3.New(session.New())
+			svc := s3.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &s3.UploadPartCopyInput{}
 			inputList := []s3.UploadPartCopyInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7348,8 +7428,569 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			}
 			return res, nil
 
+		case "pod.tzzh.sns/add-permission":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.AddPermissionInput{}
+			inputList := []sns.AddPermissionInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.AddPermission(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/check-if-phone-number-is-opted-out":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.CheckIfPhoneNumberIsOptedOutInput{}
+			inputList := []sns.CheckIfPhoneNumberIsOptedOutInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.CheckIfPhoneNumberIsOptedOut(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/confirm-subscription":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ConfirmSubscriptionInput{}
+			inputList := []sns.ConfirmSubscriptionInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ConfirmSubscription(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/create-platform-application":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.CreatePlatformApplicationInput{}
+			inputList := []sns.CreatePlatformApplicationInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.CreatePlatformApplication(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/create-platform-endpoint":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.CreatePlatformEndpointInput{}
+			inputList := []sns.CreatePlatformEndpointInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.CreatePlatformEndpoint(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/create-topic":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.CreateTopicInput{}
+			inputList := []sns.CreateTopicInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.CreateTopic(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/delete-endpoint":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.DeleteEndpointInput{}
+			inputList := []sns.DeleteEndpointInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.DeleteEndpoint(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/delete-platform-application":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.DeletePlatformApplicationInput{}
+			inputList := []sns.DeletePlatformApplicationInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.DeletePlatformApplication(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/delete-topic":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.DeleteTopicInput{}
+			inputList := []sns.DeleteTopicInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.DeleteTopic(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/get-endpoint-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.GetEndpointAttributesInput{}
+			inputList := []sns.GetEndpointAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetEndpointAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/get-platform-application-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.GetPlatformApplicationAttributesInput{}
+			inputList := []sns.GetPlatformApplicationAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetPlatformApplicationAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/get-s-m-s-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.GetSMSAttributesInput{}
+			inputList := []sns.GetSMSAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetSMSAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/get-subscription-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.GetSubscriptionAttributesInput{}
+			inputList := []sns.GetSubscriptionAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetSubscriptionAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/get-topic-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.GetTopicAttributesInput{}
+			inputList := []sns.GetTopicAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetTopicAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-endpoints-by-platform-application":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListEndpointsByPlatformApplicationInput{}
+			inputList := []sns.ListEndpointsByPlatformApplicationInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListEndpointsByPlatformApplication(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-phone-numbers-opted-out":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListPhoneNumbersOptedOutInput{}
+			inputList := []sns.ListPhoneNumbersOptedOutInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListPhoneNumbersOptedOut(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-platform-applications":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListPlatformApplicationsInput{}
+			inputList := []sns.ListPlatformApplicationsInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListPlatformApplications(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-subscriptions":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListSubscriptionsInput{}
+			inputList := []sns.ListSubscriptionsInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListSubscriptions(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-subscriptions-by-topic":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListSubscriptionsByTopicInput{}
+			inputList := []sns.ListSubscriptionsByTopicInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListSubscriptionsByTopic(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-tags-for-resource":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListTagsForResourceInput{}
+			inputList := []sns.ListTagsForResourceInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListTagsForResource(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/list-topics":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.ListTopicsInput{}
+			inputList := []sns.ListTopicsInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.ListTopics(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/opt-in-phone-number":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.OptInPhoneNumberInput{}
+			inputList := []sns.OptInPhoneNumberInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.OptInPhoneNumber(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/publish":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.PublishInput{}
+			inputList := []sns.PublishInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.Publish(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/remove-permission":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.RemovePermissionInput{}
+			inputList := []sns.RemovePermissionInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.RemovePermission(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/set-endpoint-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SetEndpointAttributesInput{}
+			inputList := []sns.SetEndpointAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.SetEndpointAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/set-platform-application-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SetPlatformApplicationAttributesInput{}
+			inputList := []sns.SetPlatformApplicationAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.SetPlatformApplicationAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/set-s-m-s-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SetSMSAttributesInput{}
+			inputList := []sns.SetSMSAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.SetSMSAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/set-subscription-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SetSubscriptionAttributesInput{}
+			inputList := []sns.SetSubscriptionAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.SetSubscriptionAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/set-topic-attributes":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SetTopicAttributesInput{}
+			inputList := []sns.SetTopicAttributesInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.SetTopicAttributes(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/subscribe":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.SubscribeInput{}
+			inputList := []sns.SubscribeInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.Subscribe(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/tag-resource":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.TagResourceInput{}
+			inputList := []sns.TagResourceInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.TagResource(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/unsubscribe":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.UnsubscribeInput{}
+			inputList := []sns.UnsubscribeInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.Unsubscribe(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sns/untag-resource":
+			svc := sns.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sns.UntagResourceInput{}
+			inputList := []sns.UntagResourceInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.UntagResource(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
 		case "pod.tzzh.sqs/add-permission":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.AddPermissionInput{}
 			inputList := []sqs.AddPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7366,7 +8007,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/change-message-visibility":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ChangeMessageVisibilityInput{}
 			inputList := []sqs.ChangeMessageVisibilityInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7383,7 +8024,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/change-message-visibility-batch":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ChangeMessageVisibilityBatchInput{}
 			inputList := []sqs.ChangeMessageVisibilityBatchInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7400,7 +8041,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/create-queue":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.CreateQueueInput{}
 			inputList := []sqs.CreateQueueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7417,7 +8058,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/delete-message":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.DeleteMessageInput{}
 			inputList := []sqs.DeleteMessageInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7434,7 +8075,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/delete-message-batch":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.DeleteMessageBatchInput{}
 			inputList := []sqs.DeleteMessageBatchInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7451,7 +8092,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/delete-queue":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.DeleteQueueInput{}
 			inputList := []sqs.DeleteQueueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7468,7 +8109,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/get-queue-attributes":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.GetQueueAttributesInput{}
 			inputList := []sqs.GetQueueAttributesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7485,7 +8126,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/get-queue-url":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.GetQueueUrlInput{}
 			inputList := []sqs.GetQueueUrlInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7502,7 +8143,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/list-dead-letter-source-queues":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ListDeadLetterSourceQueuesInput{}
 			inputList := []sqs.ListDeadLetterSourceQueuesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7519,7 +8160,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/list-queue-tags":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ListQueueTagsInput{}
 			inputList := []sqs.ListQueueTagsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7536,7 +8177,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/list-queues":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ListQueuesInput{}
 			inputList := []sqs.ListQueuesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7553,7 +8194,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/purge-queue":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.PurgeQueueInput{}
 			inputList := []sqs.PurgeQueueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7570,7 +8211,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/receive-message":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.ReceiveMessageInput{}
 			inputList := []sqs.ReceiveMessageInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7587,7 +8228,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/remove-permission":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.RemovePermissionInput{}
 			inputList := []sqs.RemovePermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7604,7 +8245,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/send-message":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.SendMessageInput{}
 			inputList := []sqs.SendMessageInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7621,7 +8262,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/send-message-batch":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.SendMessageBatchInput{}
 			inputList := []sqs.SendMessageBatchInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7638,7 +8279,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/set-queue-attributes":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.SetQueueAttributesInput{}
 			inputList := []sqs.SetQueueAttributesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7655,7 +8296,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/tag-queue":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.TagQueueInput{}
 			inputList := []sqs.TagQueueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7672,7 +8313,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.sqs/untag-queue":
-			svc := sqs.New(session.New())
+			svc := sqs.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &sqs.UntagQueueInput{}
 			inputList := []sqs.UntagQueueInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7689,7 +8330,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/add-tags-to-resource":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.AddTagsToResourceInput{}
 			inputList := []ssm.AddTagsToResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7706,7 +8347,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/cancel-command":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CancelCommandInput{}
 			inputList := []ssm.CancelCommandInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7723,7 +8364,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/cancel-maintenance-window-execution":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CancelMaintenanceWindowExecutionInput{}
 			inputList := []ssm.CancelMaintenanceWindowExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7740,7 +8381,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-activation":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateActivationInput{}
 			inputList := []ssm.CreateActivationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7757,7 +8398,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-association":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateAssociationInput{}
 			inputList := []ssm.CreateAssociationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7774,7 +8415,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-association-batch":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateAssociationBatchInput{}
 			inputList := []ssm.CreateAssociationBatchInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7791,7 +8432,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-document":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateDocumentInput{}
 			inputList := []ssm.CreateDocumentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7808,7 +8449,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateMaintenanceWindowInput{}
 			inputList := []ssm.CreateMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7825,7 +8466,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-ops-item":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateOpsItemInput{}
 			inputList := []ssm.CreateOpsItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7842,7 +8483,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreatePatchBaselineInput{}
 			inputList := []ssm.CreatePatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7859,7 +8500,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/create-resource-data-sync":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.CreateResourceDataSyncInput{}
 			inputList := []ssm.CreateResourceDataSyncInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7876,7 +8517,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-activation":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteActivationInput{}
 			inputList := []ssm.DeleteActivationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7893,7 +8534,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-association":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteAssociationInput{}
 			inputList := []ssm.DeleteAssociationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7910,7 +8551,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-document":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteDocumentInput{}
 			inputList := []ssm.DeleteDocumentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7927,7 +8568,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-inventory":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteInventoryInput{}
 			inputList := []ssm.DeleteInventoryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7944,7 +8585,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteMaintenanceWindowInput{}
 			inputList := []ssm.DeleteMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7961,7 +8602,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-parameter":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteParameterInput{}
 			inputList := []ssm.DeleteParameterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7978,7 +8619,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-parameters":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteParametersInput{}
 			inputList := []ssm.DeleteParametersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -7995,7 +8636,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeletePatchBaselineInput{}
 			inputList := []ssm.DeletePatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8012,7 +8653,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/delete-resource-data-sync":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeleteResourceDataSyncInput{}
 			inputList := []ssm.DeleteResourceDataSyncInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8029,7 +8670,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/deregister-managed-instance":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeregisterManagedInstanceInput{}
 			inputList := []ssm.DeregisterManagedInstanceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8046,7 +8687,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/deregister-patch-baseline-for-patch-group":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeregisterPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.DeregisterPatchBaselineForPatchGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8063,7 +8704,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/deregister-target-from-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeregisterTargetFromMaintenanceWindowInput{}
 			inputList := []ssm.DeregisterTargetFromMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8080,7 +8721,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/deregister-task-from-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DeregisterTaskFromMaintenanceWindowInput{}
 			inputList := []ssm.DeregisterTaskFromMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8097,7 +8738,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-activations":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeActivationsInput{}
 			inputList := []ssm.DescribeActivationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8114,7 +8755,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-association":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAssociationInput{}
 			inputList := []ssm.DescribeAssociationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8131,7 +8772,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-association-execution-targets":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAssociationExecutionTargetsInput{}
 			inputList := []ssm.DescribeAssociationExecutionTargetsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8148,7 +8789,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-association-executions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAssociationExecutionsInput{}
 			inputList := []ssm.DescribeAssociationExecutionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8165,7 +8806,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-automation-executions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAutomationExecutionsInput{}
 			inputList := []ssm.DescribeAutomationExecutionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8182,7 +8823,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-automation-step-executions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAutomationStepExecutionsInput{}
 			inputList := []ssm.DescribeAutomationStepExecutionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8199,7 +8840,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-available-patches":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeAvailablePatchesInput{}
 			inputList := []ssm.DescribeAvailablePatchesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8216,7 +8857,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-document":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeDocumentInput{}
 			inputList := []ssm.DescribeDocumentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8233,7 +8874,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-document-permission":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeDocumentPermissionInput{}
 			inputList := []ssm.DescribeDocumentPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8250,7 +8891,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-effective-instance-associations":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeEffectiveInstanceAssociationsInput{}
 			inputList := []ssm.DescribeEffectiveInstanceAssociationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8267,7 +8908,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-effective-patches-for-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeEffectivePatchesForPatchBaselineInput{}
 			inputList := []ssm.DescribeEffectivePatchesForPatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8284,7 +8925,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-instance-associations-status":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInstanceAssociationsStatusInput{}
 			inputList := []ssm.DescribeInstanceAssociationsStatusInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8301,7 +8942,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-instance-information":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInstanceInformationInput{}
 			inputList := []ssm.DescribeInstanceInformationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8318,7 +8959,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-instance-patch-states":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInstancePatchStatesInput{}
 			inputList := []ssm.DescribeInstancePatchStatesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8335,7 +8976,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-instance-patch-states-for-patch-group":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInstancePatchStatesForPatchGroupInput{}
 			inputList := []ssm.DescribeInstancePatchStatesForPatchGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8352,7 +8993,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-instance-patches":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInstancePatchesInput{}
 			inputList := []ssm.DescribeInstancePatchesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8369,7 +9010,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-inventory-deletions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeInventoryDeletionsInput{}
 			inputList := []ssm.DescribeInventoryDeletionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8386,7 +9027,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-execution-task-invocations":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowExecutionTaskInvocationsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionTaskInvocationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8403,7 +9044,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-execution-tasks":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowExecutionTasksInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionTasksInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8420,7 +9061,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-executions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowExecutionsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowExecutionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8437,7 +9078,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-schedule":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowScheduleInput{}
 			inputList := []ssm.DescribeMaintenanceWindowScheduleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8454,7 +9095,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-targets":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowTargetsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowTargetsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8471,7 +9112,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-window-tasks":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowTasksInput{}
 			inputList := []ssm.DescribeMaintenanceWindowTasksInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8488,7 +9129,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-windows":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowsInput{}
 			inputList := []ssm.DescribeMaintenanceWindowsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8505,7 +9146,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-maintenance-windows-for-target":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeMaintenanceWindowsForTargetInput{}
 			inputList := []ssm.DescribeMaintenanceWindowsForTargetInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8522,7 +9163,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-ops-items":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeOpsItemsInput{}
 			inputList := []ssm.DescribeOpsItemsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8539,7 +9180,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-parameters":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeParametersInput{}
 			inputList := []ssm.DescribeParametersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8556,7 +9197,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-patch-baselines":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribePatchBaselinesInput{}
 			inputList := []ssm.DescribePatchBaselinesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8573,7 +9214,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-patch-group-state":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribePatchGroupStateInput{}
 			inputList := []ssm.DescribePatchGroupStateInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8590,7 +9231,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-patch-groups":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribePatchGroupsInput{}
 			inputList := []ssm.DescribePatchGroupsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8607,7 +9248,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-patch-properties":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribePatchPropertiesInput{}
 			inputList := []ssm.DescribePatchPropertiesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8624,7 +9265,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/describe-sessions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.DescribeSessionsInput{}
 			inputList := []ssm.DescribeSessionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8641,7 +9282,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-automation-execution":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetAutomationExecutionInput{}
 			inputList := []ssm.GetAutomationExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8658,7 +9299,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-calendar-state":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetCalendarStateInput{}
 			inputList := []ssm.GetCalendarStateInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8675,7 +9316,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-command-invocation":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetCommandInvocationInput{}
 			inputList := []ssm.GetCommandInvocationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8692,7 +9333,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-connection-status":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetConnectionStatusInput{}
 			inputList := []ssm.GetConnectionStatusInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8709,7 +9350,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-default-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetDefaultPatchBaselineInput{}
 			inputList := []ssm.GetDefaultPatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8726,7 +9367,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-deployable-patch-snapshot-for-instance":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetDeployablePatchSnapshotForInstanceInput{}
 			inputList := []ssm.GetDeployablePatchSnapshotForInstanceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8743,7 +9384,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-document":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetDocumentInput{}
 			inputList := []ssm.GetDocumentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8760,7 +9401,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-inventory":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetInventoryInput{}
 			inputList := []ssm.GetInventoryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8777,7 +9418,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-inventory-schema":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetInventorySchemaInput{}
 			inputList := []ssm.GetInventorySchemaInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8794,7 +9435,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetMaintenanceWindowInput{}
 			inputList := []ssm.GetMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8811,7 +9452,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-maintenance-window-execution":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetMaintenanceWindowExecutionInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8828,7 +9469,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-maintenance-window-execution-task":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetMaintenanceWindowExecutionTaskInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionTaskInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8845,7 +9486,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-maintenance-window-execution-task-invocation":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetMaintenanceWindowExecutionTaskInvocationInput{}
 			inputList := []ssm.GetMaintenanceWindowExecutionTaskInvocationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8862,7 +9503,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-maintenance-window-task":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetMaintenanceWindowTaskInput{}
 			inputList := []ssm.GetMaintenanceWindowTaskInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8879,7 +9520,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-ops-item":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetOpsItemInput{}
 			inputList := []ssm.GetOpsItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8896,7 +9537,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-ops-summary":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetOpsSummaryInput{}
 			inputList := []ssm.GetOpsSummaryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8913,7 +9554,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-parameter":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetParameterInput{}
 			inputList := []ssm.GetParameterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8930,7 +9571,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-parameter-history":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetParameterHistoryInput{}
 			inputList := []ssm.GetParameterHistoryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8947,7 +9588,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-parameters":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetParametersInput{}
 			inputList := []ssm.GetParametersInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8964,7 +9605,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-parameters-by-path":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetParametersByPathInput{}
 			inputList := []ssm.GetParametersByPathInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8981,7 +9622,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetPatchBaselineInput{}
 			inputList := []ssm.GetPatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -8998,7 +9639,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-patch-baseline-for-patch-group":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.GetPatchBaselineForPatchGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9015,7 +9656,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/get-service-setting":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.GetServiceSettingInput{}
 			inputList := []ssm.GetServiceSettingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9032,7 +9673,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/label-parameter-version":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.LabelParameterVersionInput{}
 			inputList := []ssm.LabelParameterVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9049,7 +9690,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-association-versions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListAssociationVersionsInput{}
 			inputList := []ssm.ListAssociationVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9066,7 +9707,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-associations":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListAssociationsInput{}
 			inputList := []ssm.ListAssociationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9083,7 +9724,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-command-invocations":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListCommandInvocationsInput{}
 			inputList := []ssm.ListCommandInvocationsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9100,7 +9741,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-commands":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListCommandsInput{}
 			inputList := []ssm.ListCommandsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9117,7 +9758,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-compliance-items":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListComplianceItemsInput{}
 			inputList := []ssm.ListComplianceItemsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9134,7 +9775,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-compliance-summaries":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListComplianceSummariesInput{}
 			inputList := []ssm.ListComplianceSummariesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9151,7 +9792,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-document-versions":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListDocumentVersionsInput{}
 			inputList := []ssm.ListDocumentVersionsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9168,7 +9809,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-documents":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListDocumentsInput{}
 			inputList := []ssm.ListDocumentsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9185,7 +9826,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-inventory-entries":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListInventoryEntriesInput{}
 			inputList := []ssm.ListInventoryEntriesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9202,7 +9843,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-resource-compliance-summaries":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListResourceComplianceSummariesInput{}
 			inputList := []ssm.ListResourceComplianceSummariesInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9219,7 +9860,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-resource-data-sync":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListResourceDataSyncInput{}
 			inputList := []ssm.ListResourceDataSyncInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9236,7 +9877,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/list-tags-for-resource":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ListTagsForResourceInput{}
 			inputList := []ssm.ListTagsForResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9253,7 +9894,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/modify-document-permission":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ModifyDocumentPermissionInput{}
 			inputList := []ssm.ModifyDocumentPermissionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9270,7 +9911,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/put-compliance-items":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.PutComplianceItemsInput{}
 			inputList := []ssm.PutComplianceItemsInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9287,7 +9928,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/put-inventory":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.PutInventoryInput{}
 			inputList := []ssm.PutInventoryInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9304,7 +9945,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/put-parameter":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.PutParameterInput{}
 			inputList := []ssm.PutParameterInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9321,7 +9962,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/register-default-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.RegisterDefaultPatchBaselineInput{}
 			inputList := []ssm.RegisterDefaultPatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9338,7 +9979,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/register-patch-baseline-for-patch-group":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.RegisterPatchBaselineForPatchGroupInput{}
 			inputList := []ssm.RegisterPatchBaselineForPatchGroupInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9355,7 +9996,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/register-target-with-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.RegisterTargetWithMaintenanceWindowInput{}
 			inputList := []ssm.RegisterTargetWithMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9372,7 +10013,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/register-task-with-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.RegisterTaskWithMaintenanceWindowInput{}
 			inputList := []ssm.RegisterTaskWithMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9389,7 +10030,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/remove-tags-from-resource":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.RemoveTagsFromResourceInput{}
 			inputList := []ssm.RemoveTagsFromResourceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9406,7 +10047,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/reset-service-setting":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ResetServiceSettingInput{}
 			inputList := []ssm.ResetServiceSettingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9423,7 +10064,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/resume-session":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.ResumeSessionInput{}
 			inputList := []ssm.ResumeSessionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9440,7 +10081,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/send-automation-signal":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.SendAutomationSignalInput{}
 			inputList := []ssm.SendAutomationSignalInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9457,7 +10098,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/send-command":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.SendCommandInput{}
 			inputList := []ssm.SendCommandInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9474,7 +10115,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/start-associations-once":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.StartAssociationsOnceInput{}
 			inputList := []ssm.StartAssociationsOnceInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9491,7 +10132,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/start-automation-execution":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.StartAutomationExecutionInput{}
 			inputList := []ssm.StartAutomationExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9508,7 +10149,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/start-session":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.StartSessionInput{}
 			inputList := []ssm.StartSessionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9525,7 +10166,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/stop-automation-execution":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.StopAutomationExecutionInput{}
 			inputList := []ssm.StopAutomationExecutionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9542,7 +10183,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/terminate-session":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.TerminateSessionInput{}
 			inputList := []ssm.TerminateSessionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9559,7 +10200,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-association":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateAssociationInput{}
 			inputList := []ssm.UpdateAssociationInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9576,7 +10217,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-association-status":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateAssociationStatusInput{}
 			inputList := []ssm.UpdateAssociationStatusInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9593,7 +10234,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-document":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateDocumentInput{}
 			inputList := []ssm.UpdateDocumentInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9610,7 +10251,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-document-default-version":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateDocumentDefaultVersionInput{}
 			inputList := []ssm.UpdateDocumentDefaultVersionInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9627,7 +10268,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-maintenance-window":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateMaintenanceWindowInput{}
 			inputList := []ssm.UpdateMaintenanceWindowInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9644,7 +10285,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-maintenance-window-target":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateMaintenanceWindowTargetInput{}
 			inputList := []ssm.UpdateMaintenanceWindowTargetInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9661,7 +10302,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-maintenance-window-task":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateMaintenanceWindowTaskInput{}
 			inputList := []ssm.UpdateMaintenanceWindowTaskInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9678,7 +10319,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-managed-instance-role":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateManagedInstanceRoleInput{}
 			inputList := []ssm.UpdateManagedInstanceRoleInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9695,7 +10336,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-ops-item":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateOpsItemInput{}
 			inputList := []ssm.UpdateOpsItemInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9712,7 +10353,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-patch-baseline":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdatePatchBaselineInput{}
 			inputList := []ssm.UpdatePatchBaselineInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9729,7 +10370,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-resource-data-sync":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateResourceDataSyncInput{}
 			inputList := []ssm.UpdateResourceDataSyncInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9746,7 +10387,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 			return res, nil
 
 		case "pod.tzzh.ssm/update-service-setting":
-			svc := ssm.New(session.New())
+			svc := ssm.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
 			input := &ssm.UpdateServiceSettingInput{}
 			inputList := []ssm.UpdateServiceSettingInput{}
 			err := json.Unmarshal([]byte(message.Args), &inputList)
@@ -9757,6 +10398,142 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				input = &inputList[0]
 			}
 			res, err := svc.UpdateServiceSetting(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/assume-role":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.AssumeRoleInput{}
+			inputList := []sts.AssumeRoleInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.AssumeRole(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/assume-role-with-s-a-m-l":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.AssumeRoleWithSAMLInput{}
+			inputList := []sts.AssumeRoleWithSAMLInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.AssumeRoleWithSAML(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/assume-role-with-web-identity":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.AssumeRoleWithWebIdentityInput{}
+			inputList := []sts.AssumeRoleWithWebIdentityInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.AssumeRoleWithWebIdentity(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/decode-authorization-message":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.DecodeAuthorizationMessageInput{}
+			inputList := []sts.DecodeAuthorizationMessageInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.DecodeAuthorizationMessage(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/get-access-key-info":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.GetAccessKeyInfoInput{}
+			inputList := []sts.GetAccessKeyInfoInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetAccessKeyInfo(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/get-caller-identity":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.GetCallerIdentityInput{}
+			inputList := []sts.GetCallerIdentityInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetCallerIdentity(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/get-federation-token":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.GetFederationTokenInput{}
+			inputList := []sts.GetFederationTokenInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetFederationToken(input)
+			if err != nil {
+				return nil, err
+			}
+			return res, nil
+
+		case "pod.tzzh.sts/get-session-token":
+			svc := sts.New(session.Must(session.NewSessionWithOptions(SessionOptions)))
+			input := &sts.GetSessionTokenInput{}
+			inputList := []sts.GetSessionTokenInput{}
+			err := json.Unmarshal([]byte(message.Args), &inputList)
+			if err != nil {
+				return nil, err
+			}
+			if len(inputList) > 0 {
+				input = &inputList[0]
+			}
+			res, err := svc.GetSessionToken(input)
 			if err != nil {
 				return nil, err
 			}
