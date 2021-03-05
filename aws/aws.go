@@ -40,7 +40,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 				},
 				{Name: "pod.tzzh.podconfig",
 					Vars: []babashka.Var{
-						{Name: "set-creds"},
+						{Name: "set-session-options"},
 					},
 				},
 				{Name: "pod.tzzh.athena",
@@ -682,7 +682,7 @@ func ProcessMessage(message *babashka.Message) (interface{}, error) {
 
 	} else if message.Op == "invoke" {
 		switch message.Var {
-		case "pod.tzzh.podconfig/set-creds":
+		case "pod.tzzh.podconfig/set-session-options":
 			var cfg []Config
 			err := json.Unmarshal([]byte(message.Args), &cfg)
 			if err != nil {
