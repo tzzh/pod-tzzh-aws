@@ -19,10 +19,13 @@ Get the latest release and then:
 (require '[babashka.pods])
 (babashka.pods/load-pod ["./pod-tzzh-aws"])
 (require '[pod.tzzh.dynamodb :as d])
+(require '[pod.tzzh.podconfig :as config]')
 (require '[pod.tzzh.s3 :as s3])
 (require '[pod.tzzh.glue :as g])
 (require '[pod.tzzh.paginator :as p])
 
+;; Optional
+(config/set-creds {:Profile "default" :Region "us-east-1"})
 
 (d/list-tables)
 
@@ -52,6 +55,11 @@ Get the latest release and then:
 (let [glue-paginator (p/get-paginator g/list-crawlers)]
          (glue-paginator))
 ```
+
+## Session Configuration
+
+To allow for the targeting of multiple credentials an optional call to `pod.tzzh.podconfig/set-session-options`
+will result in all subsequent function calls to use the set session option. 
 
 ## Paginators
 
